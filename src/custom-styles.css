@@ -1,0 +1,117 @@
+/* Global Styles */
+body {
+    font-family: "Poppins", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #525f7f;
+    text-align: left;
+    background-color: #f4f5f7; /* Light grey background */
+  }
+  
+  a {
+    color: #5e72e4; /* Light blue links */
+    text-decoration: none;
+  }
+  
+  /* Table Styles */
+  .table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #525f7f;
+    border-collapse: collapse;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+  }
+  
+  .table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+  }
+  
+  .table tbody + tbody {
+    border-top: 2px solid #dee2e6;
+  }
+  
+  .table .table {
+    background-color: #fff;
+  }
+  
+  /* Card Styles */
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.25rem;
+  }
+  
+  .card-header {
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 0;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    text-align: center; /* Center aligns the card header content */
+  }
+  
+  .card-body {
+    flex: 1 1 auto;
+    padding: 1.25rem;
+  }
+ 
+  
+/* Button General Styling */
+.btn-custom {
+    display: inline-block;
+    font-weight: 400;
+    color: #ffffff; /* Text color */
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: #1d8cf8; /* Primary button color */
+    border: 1px solid transparent;
+    padding: 0.625rem 1.25rem; /* Adjusted padding for size */
+    font-size: 0.875rem; /* Font size */
+    line-height: 1.5;
+    border-radius: 0.25rem; /* Border radius for rounded corners */
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08); /* Shadow for depth */
+  }
+  
+  /* Button Hover State */
+  .btn-custom:hover {
+    background-color: #3358f4; /* Darker shade on hover */
+    border-color: #3358f4;
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4); /* Enhanced shadow on hover */
+    transform: translateY(-1px); /* Slight lift effect on hover */
+  }
+  
+  /* Custom button sizes for different contexts */
+  .btn-sm-custom {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.2rem;
+  }
+  
+/* Custom styles for the specific container */
+.custom-container {
+    max-width: none; /* or max-width: 100%; */
+  }
+
+.container, .container-fluid, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
+  max-width: none; /* Override maximum width */
+  width: 100%; /* Ensure container fills the available width */
+  padding-right: var(--bs-gutter-x); /* Adjust padding if necessary */
+  padding-left: var(--bs-gutter-x); /* Adjust padding if necessary */
+  margin-right: 0; /* Remove margin */
+  margin-left: 0; /* Remove margin */
+}
