@@ -1,17 +1,23 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Navbar, Nav } from 'react-bootstrap';
+import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 
 const Navigation = () => {
   return (
-    <Navbar bg="light" expand="lg">
-      <Navbar.Brand href="/">Truck Inventory Dashboard</Navbar.Brand>
+    <Navbar variant="dark" expand="lg" className="custom-navbar py-1" style={{ paddingLeft: '1rem' }}> {/* Adjust padding to move brand name */}
+      <Navbar.Brand className="navbar-brand" style={{ pointerEvents: 'none', cursor: 'default' }}>
+        Ameritruck
+      </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
-          <Nav.Link as={Link} to="/">Dashboard</Nav.Link>
-          <Nav.Link as={Link} to="/addtruck">Add Truck</Nav.Link>
-          <Nav.Link as={Link} to="/trucklist">Truck List</Nav.Link>
+          <NavDropdown title="Trucks" id="nav-dropdown-trucks" className="text-white">
+            <NavDropdown.Item href="/truck-list">Truck List</NavDropdown.Item>
+            <NavDropdown.Item href="/add-truck">Add Truck</NavDropdown.Item>
+            <NavDropdown.Item href="/add-multiple-trucks">Add Multiple Trucks</NavDropdown.Item>
+          </NavDropdown>
+          <NavDropdown title="Contacts" id="nav-dropdown-contacts" className="text-white">
+            <NavDropdown.Item href="/contacts">Manage Contacts</NavDropdown.Item>
+          </NavDropdown>
         </Nav>
       </Navbar.Collapse>
     </Navbar>

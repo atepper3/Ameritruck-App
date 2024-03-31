@@ -1,0 +1,152 @@
+:root {
+  --dark-bg: #121212;
+  --darker-bg: #0a0a0a;
+  --lighter-gray: #2a2a2a; /* Lighter gray for alternating table rows */
+  --dark-gray: #1c1c1c; /* Dark gray for table headers and other elements */
+  --font-color: #ffffff;
+  --accent-color: #306998; /* Accent color for buttons and links */
+  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--dark-bg);
+  color: var(--font-color);
+  font-family: var(--font-family);
+}
+
+.card {
+  border: none;
+  background-color: var(--darker-bg);
+}
+
+.card-header {
+  background-color: var(--dark-gray);
+  border-bottom: 1px solid var(--lighter-gray);
+}
+
+.card-header h2.mb-0 {
+  color: var(--font-color); 
+}
+
+.table-dark {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-dark thead th {
+  background-color: var(--dark-gray);
+  border-bottom: 2px solid var(--darker-bg);
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.table-dark tbody tr:nth-of-type(odd) {
+  background-color: var(--darker-bg);
+}
+
+.table-dark tbody tr:nth-of-type(even) {
+  background-color: var(--lighter-gray);
+}
+
+.table-dark tbody tr:hover {
+  background-color: var(--dark-gray);
+}
+
+.btn-custom {
+  background-color: var(--accent-color);
+  border: none;
+  color: var(--font-color);
+}
+
+.btn-custom:hover {
+  background-color: lighten(var(--accent-color), 10%);
+}
+
+/* Responsive text sizing */
+h2 {
+  font-size: 1.5rem; /* Adjust size as needed */
+}
+
+.form-control, .form-select, .btn-primary {
+  background-color: var(--darker-bg);
+  color: var(--font-color);
+  border: 1px solid var(--lighter-gray);
+}
+
+.form-control:disabled, .form-select:disabled {
+  background-color: var(--darker-bg);
+  color: var(--font-color);
+  border: 1px solid var(--lighter-gray);
+}
+
+.form-label {
+  color: var(--font-color);
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.btn-primary:hover {
+  background-color: lighten(var(--accent-color), 10%);
+}
+
+.dark-modal .form-control {
+  background-color: #333;
+  border: 1px solid #666;
+  color: #fff;
+}
+
+.dark-modal .form-control:focus {
+  background-color: #333;
+  border-color: #555;
+  box-shadow: none;
+  color: #fff;
+}
+
+
+.modal-dark .modal-content {
+  background-color: #333;
+  color: #ddd;
+}
+
+.modal-dark-header .modal-title {
+  color: #fff;
+}
+
+.modal-dark-body .form-control {
+  background-color: #222;
+  border: 1px solid #555;
+  color: #eee;
+}
+
+.custom-dark-button {
+  background-color: #0062cc;
+  border-color: #005cbf;
+}
+
+/* Hover states for the custom dark button */
+.custom-dark-button:hover {
+  background-color: #0056b3;
+  border-color: #004ba0;
+}
+
+.custom-modal .modal-content {
+  background-color: #333; /* Dark background for the modal content */
+  color: white; /* White text color */
+}
+
+.custom-modal .form-control, .custom-modal .form-select {
+  background-color: #222; /* Darker background for form inputs */
+  border: 1px solid #555; /* Darker border for inputs */
+  color: white; /* White text color for inputs */
+}
+
+.custom-modal .btn-secondary {
+  background-color: #555; /* Darker background for the secondary button */
+}
+
+.custom-modal .btn-primary {
+  background-color: #007bff; /* Primary button color, adjust as needed */
+}

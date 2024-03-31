@@ -1,0 +1,30 @@
+.custom-navbar {
+    background-color: var(--darker-bg);
+    border-bottom: 1px solid var(--lighter-gray);
+  }
+  
+  .navbar-brand, .nav-link {
+    color: var(--font-color) !important; /* Overrides default Bootstrap colors */
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .navbar-brand:hover, .nav-link:hover {
+    color: var(--accent-color) !important; /* Adds a hover color */
+  }
+  
+  /* This ensures that the nav links have the correct spacing and alignment */
+  .nav-link {
+    margin-right: 1rem; /* Adjust spacing as needed */
+  }
+  
+  /* Toggle and Collapse button styling for better visibility */
+  .navbar-toggler {
+    border-color: var(--lighter-gray);
+  }
+  
+  .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(255, 255, 255, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  }
+  
+  /* Add additional styles as needed */
+  

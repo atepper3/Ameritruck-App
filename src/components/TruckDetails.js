@@ -5,7 +5,6 @@ import { doc, getDoc, updateDoc, collection, addDoc, onSnapshot } from 'firebase
 import { Tabs, Tab, Button, Modal } from 'react-bootstrap';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
-import CommissionForm from './CommissionForm';
 import CommissionList from './CommissionList';
 import CommissionCalculator from './CommissionCalculator';
 import TruckInfo from './TruckInfo'; // Make sure this import points to your TruckInfo component
@@ -137,27 +136,18 @@ const TruckDetails = () => {
                     </div>
                     </Tab>
                 <Tab eventKey="commissions" title="Commissions">
-                    <div>
-                        <Button variant="primary" onClick={() => setShowCommissionForm(true)}>Add Commission</Button>
-                        <Modal show={showCommissionForm} onHide={() => setShowCommissionForm(false)}>
-                            <Modal.Header closeButton>
-                                <Modal.Title>Add Commission</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                                <CommissionForm handleClose={() => setShowCommissionForm(false)} handleCommissionSubmit={handleCommissionSubmit} />
-                            </Modal.Body>
-                        </Modal>
-                        {/* Render CommissionList with commissions filtered by truck ID */}
-                        <CommissionList commissions={commissions.filter(commission => commission.truckId === id)} truckId={id} />
-                        <CommissionCalculator
-                            key={commissions.length} // or another unique value from state that changes on update
-                            buyerCommissions={buyerCommissions}
-                            sellerCommissions={sellerCommissions}
-                            purchasePrice={truck.truckinfo.purchasePrice || 0}
-                            soldPrice={truck.truckinfo.soldPrice || 0}
-                            expenses={expenses}
-                            />
-                    </div>
+                    <CommissionList 
+                        truckId={id} 
+                        handleCommissionSubmit={handleCommissionSubmit}
+                    />
+                    <CommissionCalculator
+                        key={commissions.length} // Ensures re-rendering when commissions change.
+                        buyerCommissions={buyerCommissions}
+                        sellerCommissions={sellerCommissions}
+                        purchasePrice={truck.truckinfo.purchasePrice || 0}
+                        soldPrice={truck.truckinfo.soldPrice || 0}
+                        expenses={expenses}
+                    />
                 </Tab>
             </Tabs>
         </div>

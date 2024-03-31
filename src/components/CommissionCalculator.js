@@ -44,7 +44,7 @@ const CommissionCalculator = ({
     const netProfit = grossProfit - totalCommissions;
 
     return (
-        <Table striped bordered hover>
+        <Table striped bordered hover variant="dark"> {/* Apply dark theme here */}
             <thead>
                 <tr>
                     <th>Category</th>

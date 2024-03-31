@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
-import Table from 'react-bootstrap/Table';
+import { Button, Table, Modal } from 'react-bootstrap';
+import CommissionForm from './CommissionForm';
 
-const CommissionList = ({ truckId }) => {
-    // State definitions
+const CommissionList = ({ truckId, handleCommissionSubmit }) => {
     const [commissions, setCommissions] = useState([]);
+    const [showCommissionForm, setShowCommissionForm] = useState(false);
 
-    // useEffect for fetching commissions
     useEffect(() => {
         if (truckId) {
             const q = query(collection(db, "trucks", truckId, "commissions"));
@@ -20,13 +20,6 @@ const CommissionList = ({ truckId }) => {
         }
     }, [truckId]);
 
-    // Filtering logic for commissions
-    const buyerCommissions = commissions.filter(commission =>
-        commission.type === "Buyer Flat Rate" || commission.type === "Buyer %");
-    const sellerCommissions = commissions.filter(commission =>
-        commission.type === "Seller Flat Rate" || commission.type === "Seller %");
-
-    // deleteCommission function definition
     const deleteCommission = async (commissionId) => {
         try {
             await deleteDoc(doc(db, "trucks", truckId, "commissions", commissionId));
@@ -39,55 +32,53 @@ const CommissionList = ({ truckId }) => {
 
     return (
         <div>
-            {/* Buyer Commissions Table */}
-            <h2>Buyer Commissions</h2>
-            <Table striped bordered hover>
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Name</th>
-                        <th>Amount</th>
-                        <th>Action</th> {/* Add a column for actions */}
-                    </tr>
-                </thead>
-                <tbody>
-                    {buyerCommissions.map((commission) => (
-                        <tr key={commission.id}>
-                            <td>{commission.type}</td>
-                            <td>{commission.name}</td>
-                            <td>{commission.amount}</td>
-                            <td>
-                                <button onClick={() => deleteCommission(commission.id)}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
+            <Button variant="primary" onClick={() => setShowCommissionForm(true)}>Add Commission</Button>
+                <Modal.Body>
+                    <CommissionForm 
+                        show={showCommissionForm}
+                        handleClose={() => setShowCommissionForm(false)} 
+                        handleCommissionSubmit={(commissionData) => {
+                            handleCommissionSubmit(commissionData);
+                            setShowCommissionForm(false); // Close modal on submit
+                        }}
+                        truckId={truckId} />
+                </Modal.Body>
 
-            {/* Seller Commissions Table */}
-            <h2>Seller Commissions</h2>
-            <Table striped bordered hover>
-                <thead>
-                    <tr>
-                        <th>Type</th>
-                        <th>Name</th>
-                        <th>Amount</th>
-                        <th>Action</th> {/* Add a column for actions */}
-                    </tr>
-                </thead>
-                <tbody>
-                    {sellerCommissions.map((commission) => (
-                        <tr key={commission.id}>
-                            <td>{commission.type}</td>
-                            <td>{commission.name}</td>
-                            <td>{commission.amount}</td>
-                            <td>
-                                <button onClick={() => deleteCommission(commission.id)}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>
+            {['Buyer Commissions', 'Seller Commissions'].map((title, index) => {
+                const isBuyer = index === 0;
+                const filteredCommissions = commissions.filter(commission => 
+                    isBuyer ? commission.type.includes('Buyer') : commission.type.includes('Seller'));
+
+                return (
+                    <div key={title}>
+                        <h2 className="text-light">{title}</h2>
+                        <Table striped bordered hover variant="dark" size="sm">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Name</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredCommissions.map((commission) => (
+                                    <tr key={commission.id}>
+                                        <td>{commission.type}</td>
+                                        <td>{commission.name}</td>
+                                        <td>${commission.amount}</td>
+                                        <td>
+                                            <Button variant="danger" size="sm" onClick={() => deleteCommission(commission.id)}>
+                                                Delete
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
+                    </div>
+                );
+            })}
         </div>
     );
 };

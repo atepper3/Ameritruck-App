@@ -26,7 +26,7 @@ const ExpenseList = ({ expenses, truckId, setExpenses, setSelectedExpense, setSh
 
     return (
         <>
-            <Table striped bordered hover size="sm" className="mb-3">
+            <Table striped bordered hover size="sm" className="mb-3 table-dark"> {/* Add table-dark class here */}
                 <thead>
                     <tr>
                         <th>Category</th>
@@ -60,12 +60,11 @@ const ExpenseList = ({ expenses, truckId, setExpenses, setSelectedExpense, setSh
                 </tbody>
             </Table>
             <div style={{ marginTop: '25px' }}>
-                <Table>
+                <Table variant="dark"> {/* Use the 'variant' prop to ensure dark theme */}
                     <tbody>
-                        <tr className="table-secondary">
-                            <td style={{ fontWeight: 'bold', textAlign: 'left', width: '30%' }}>Total Expenses:</td>
-                            <td style={{ textAlign: 'left', width: '55%' }}></td> {/* Empty cell for spacing */}
-                            <td style={{ fontWeight: 'bold', textAlign: 'left', width: '60%' }}>${totalExpenses.toFixed(2)}</td>
+                        <tr>
+                            <td style={{ fontWeight: 'bold', textAlign: 'left', width: '70%' }}>Total Expenses:</td>
+                            <td style={{ fontWeight: 'bold', textAlign: 'right', width: '30%' }}>${totalExpenses.toFixed(2)}</td>
                         </tr>
                     </tbody>
                 </Table>

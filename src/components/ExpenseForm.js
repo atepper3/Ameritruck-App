@@ -49,11 +49,11 @@ const ExpenseForm = ({ show, handleClose, expense, truckId, updateExpenses }) =>
   };
 
   return (
-    <Modal show={show} onHide={handleClose}>
-      <Modal.Header closeButton>
+    <Modal show={show} onHide={handleClose} dialogClassName="modal-dark"> {/* Add a custom class name */}
+      <Modal.Header closeButton className="modal-dark-header"> {/* Add a custom class name */}
         <Modal.Title>{expense ? 'Edit Expense' : 'Add Expense'}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body className="modal-dark-body"> {/* Add a custom class name */}
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
             <Form.Label>Category</Form.Label>

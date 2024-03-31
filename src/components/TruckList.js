@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { Card, CardHeader, CardBody, Container, Row, Col } from "reactstrap";
+import { Card, CardHeader, CardBody, Row, Col } from "reactstrap";
 
 const TruckList = () => {
   const [trucks, setTrucks] = useState([]);
@@ -50,7 +50,7 @@ const TruckList = () => {
     price ? `$${parseFloat(price).toFixed(2)}` : "";
 
   return (
-    <Container fluid>
+    <div className="container-fluid">
       <Row className="justify-content-center">
         <Col lg="12">
           <Card className="shadow">
@@ -115,7 +115,7 @@ const TruckList = () => {
           </Card>
         </Col>
       </Row>
-    </Container>
+    </div>
   );
 };
 export default TruckList;
