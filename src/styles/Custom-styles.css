@@ -22,6 +22,7 @@ body {
 .card-header {
   background-color: var(--dark-gray);
   border-bottom: 1px solid var(--lighter-gray);
+  color: var(--font-color);
 }
 
 .card-header h2.mb-0 {
@@ -150,3 +151,5 @@ h2 {
 .custom-modal .btn-primary {
   background-color: #007bff; /* Primary button color, adjust as needed */
 }
+
+

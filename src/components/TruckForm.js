@@ -18,8 +18,8 @@ const TruckForm = () => {
         vinSerial: '',
         classification: '',
         location: '',
-        truckHere: false,
-        titleIn: false,
+        truckHere: '',
+        titleIn: '',
         titleNote: '',
         closeType: '',
         customer: '',
@@ -29,7 +29,7 @@ const TruckForm = () => {
         fundedDate: '',
         fundingType: '',
         referralSource: '',
-        titleOut: false,
+        titleOut: '',
         titleOutNote: '',
         comments: '',
     });
@@ -68,8 +68,8 @@ const TruckForm = () => {
                 vinSerial: '',
                 classification: '',
                 location: '',
-                truckHere: false,
-                titleIn: false,
+                truckHere: '',
+                titleIn: '',
                 titleNote: '',
                 closeType: '',
                 customer: '',
@@ -79,7 +79,7 @@ const TruckForm = () => {
                 fundedDate: '',
                 fundingType: '',
                 referralSource: '',
-                titleOut: false,
+                titleOut: '',
                 titleOutNote: '',
                 comments: '',
             }); // Optionally reset the form
@@ -168,20 +168,25 @@ const TruckForm = () => {
                                         <label className="form-label">Classification:</label>
                                         <input className="form-control" type="text" name="classification" value={truckData.classification} onChange={handleChange} />
                                     </div>
+
                                     <div className="col-md-3 mb-3">
                                         <label className="form-label">Location:</label>
                                         <input className="form-control" type="text" name="location" value={truckData.location} onChange={handleChange} />
                                     </div>
+
                                     <div className="col-md-3 mb-3">
                                         <label className="form-label">Truck Here?</label>
-                                        <select className="form-control" name="truckHere" value={truckData.truckHere ? "Yes" : "No"} onChange={handleChange} required>
+                                        <select className="form-control" name="truckHere" value={truckData.truckHere} onChange={handleChange} required>
+                                            <option value="">Select Status</option>
                                             <option value="Yes">Yes</option>
                                             <option value="No">No</option>
                                         </select>
                                     </div>
+
                                     <div className="col-md-3 mb-3">
                                         <label className="form-label">Title In:</label>
-                                        <select className="form-control" name="titleIn" value={truckData.titleIn ? "Yes" : "No"} onChange={handleChange} required>
+                                        <select className="form-control" name="titleIn" value={truckData.titleIn} onChange={handleChange} required>
+                                            <option value="">Select Status</option>
                                             <option value="Yes">Yes</option>
                                             <option value="No">No</option>
                                         </select>
@@ -231,13 +236,16 @@ const TruckForm = () => {
                                         <label className="form-label">Referral Source:</label>
                                         <input className="form-control" type="text" name="referralSource" value={truckData.referralSource} onChange={handleChange} />
                                     </div>
+
                                     <div className="col-md-3 mb-3">
                                         <label className="form-label">Title Out:</label>
-                                        <select className="form-control" name="titleOut" value={truckData.titleOut ? "Yes" : "No"} onChange={handleChange} required>
+                                        <select className="form-control" name="titleOut" value={truckData.titleOut} onChange={handleChange} required>
+                                            <option value="">Select Status</option>
                                             <option value="Yes">Yes</option>
                                             <option value="No">No</option>
                                         </select>
                                     </div>
+
                                     <div className="col-md-3 mb-3">
                                         <label className="form-label">Title Out Note:</label>
                                         <input className="form-control" type="text" name="titleOutNote" value={truckData.titleOutNote} onChange={handleChange} />

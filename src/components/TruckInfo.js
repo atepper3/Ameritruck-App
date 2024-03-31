@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { Button, Form, Container, Card } from 'react-bootstrap';
+import { Button, Form, Container, Card, Table } from 'react-bootstrap';
 
 const TruckInfo = () => {
     const { id } = useParams();
@@ -13,133 +13,154 @@ const TruckInfo = () => {
         const fetchTruckInfo = async () => {
             const truckRef = doc(db, 'trucks', id);
             const truckSnap = await getDoc(truckRef);
+
             if (truckSnap.exists() && truckSnap.data().truckinfo) {
-                // Directly set truck information without conversion
                 setTruck(truckSnap.data().truckinfo);
             } else {
                 console.log("No truck information found!");
             }
         };
-    
+
         fetchTruckInfo();
     }, [id]);
-    
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setTruck(prev => ({
             ...prev,
-            [name]: value,
+            [name]: type === 'checkbox' ? checked : value,
         }));
     };
-    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const truckRef = doc(db, 'trucks', id);
-            await updateDoc(truckRef, { truckinfo: truck });
+            await updateDoc(doc(db, 'trucks', id), { truckinfo: truck });
             alert('Truck information updated successfully!');
-            setEditable(false);
+            setEditable(!editable);
         } catch (error) {
             console.error('Error updating truck: ', error);
             alert('Failed to update truck.');
         }
     };
 
+    // Define categories and fields for better organization
+// Define categories and fields for better organization
+    const fieldGroups = [
+        {
+            title: "Truck Identification",
+            fields: [
+                { name: 'stockNumber', label: 'Stock Number', type: 'text' },
+                { name: 'fleetNumber', label: 'Fleet Number', type: 'text' },
+                { name: 'vinSerial', label: 'VIN', type: 'text' },
+                { name: 'year', label: 'Year', type: 'text' },
+                { name: 'make', label: 'Make', type: 'text' },
+                { name: 'model', label: 'Model', type: 'text' },
+                { name: 'classification', label: 'Classification', type: 'text' },
+            ]
+        },
+        {
+            title: "Purchase",
+            fields: [
+                { name: 'purchaseDate', label: 'Purchase Date', type: 'date' },
+                { name: 'purchasedFrom', label: 'Purchased From', type: 'text' },
+                { name: 'purchasePrice', label: 'Purchase Price', type: 'number' },
+                { name: 'buyer', label: 'Buyer', type: 'text' },
+                { name: 'location', label: 'Location', type: 'text' },
+                { name: 'status', label: 'Status', type: 'select', options: ['Active', 'Future', 'Pending', 'Sold'] },
+            ]
+        },
+        {
+            title: "Sale Information",
+            fields: [
+                { name: 'customer', label: 'Customer', type: 'text' },
+                { name: 'saleType', label: 'Sale Type', type: 'text' },
+                { name: 'saleDate', label: 'Sale Date', type: 'date' },
+                { name: 'soldPrice', label: 'Sold Price', type: 'number' },
+                { name: 'salesman', label: 'Salesman', type: 'text' },
+                { name: 'closeType', label: 'Close Type', type: 'text' },
+                { name: 'fundedDate', label: 'Funded Date', type: 'date' },
+                { name: 'fundingType', label: 'Funding Type', type: 'text' },
+            ]
+        },
+        {
+            title: "Additional Info",
+            fields: [
+                { name: 'truckHere', label: 'Truck Here?', type: 'select', options: ['Yes', 'No'] },
+                { name: 'titleIn', label: 'Title In', type: 'select', options: ['Yes', 'No'] },
+                { name: 'titleOut', label: 'Title Out', type: 'select', options: ['Yes', 'No'] },
+                { name: 'titleNote', label: 'Title Note', type: 'textarea' },
+                { name: 'titleOutNote', label: 'Title Out Note', type: 'textarea' },
+                { name: 'comments', label: 'Comments', type: 'textarea' },
+                { name: 'referralSource', label: 'Referral Source', type: 'text' },
+            ]
+        },
+    ];
+
+
     return (
         <Container className="mt-4">
-            <Card className="shadow bg-dark text-white">
-                <Card.Header className="d-flex justify-content-between align-items-center">
-                    <h5>Truck Information</h5>
-                    <Button onClick={() => setEditable(!editable)} variant={editable ? "outline-danger" : "outline-primary"} size="sm">
-                        {editable ? 'Cancel' : 'Edit'}
-                    </Button>
-                </Card.Header>
-                <Card.Body>
-                    <Form onSubmit={handleSubmit} className="text-white">
-                        <fieldset disabled={!editable}>
-                            <div className="row">
-                                {/* Assuming you have similar fields setup as in the TruckForm */}
-                                {[
-                                    { label: "Stock Number", value: truck.stockNumber, name: "stockNumber" },
-                                    { label: "Fleet Number", value: truck.fleetNumber, name: "fleetNumber" },
-                                    { label: "Status", value: truck.status, name: "status", isSelect: true, options: ["Active", "Future", "Pending", "Sold"] },
-                                    { label: "Sale Type", value: truck.saleType, name: "saleType" },
-                                    { label: "Purchase Date", value: truck.purchaseDate, name: "purchaseDate", type: "date" },
-                                    { label: "Purchased From", value: truck.purchasedFrom, name: "purchasedFrom" },
-                                    { label: "Purchase Price", value: truck.purchasePrice, name: "purchasePrice", type: "number" },
-                                    { label: "Buyer", value: truck.buyer, name: "buyer" },
-                                    { label: "Year", value: truck.year, name: "year" },
-                                    { label: "Make", value: truck.make, name: "make" },
-                                    { label: "Model", value: truck.model, name: "model" },
-                                    { label: "VIN/Serial", value: truck.vinSerial, name: "vinSerial" },
-                                    { label: "Classification", value: truck.classification, name: "classification" },
-                                    { label: "Location", value: truck.location, name: "location" },
-                                    { label: "Truck Here?", value: truck.truckHere, name: "truckHere", isSelect: true, options: ["Yes", "No"] },
-                                    { label: "Title In", value: truck.titleIn, name: "titleIn", isSelect: true, options: ["Yes", "No"] },
-                                    { label: "Title In Note", value: truck.titleInNote, name: "titleInNote" },
-                                    { label: "Close Type", value: truck.closeType, name: "closeType" },
-                                    { label: "Customer", value: truck.customer, name: "customer" },
-                                    { label: "Sale Date", value: truck.saleDate, name: "saleDate", type: "date" },
-                                    { label: "Sold Price", value: truck.soldPrice, name: "soldPrice", type: "number" },
-                                    { label: "Salesman", value: truck.salesman, name: "salesman" },
-                                    { label: "Funded Date", value: truck.fundedDate, name: "fundedDate", type: "date" },
-                                    { label: "Funding Type", value: truck.fundingType, name: "fundingType" },
-                                    { label: "Referral Source", value: truck.referralSource, name: "referralSource" },
-                                    { label: "Title Out", value: truck.titleOut, name: "titleOut", isSelect: true, options: ["Yes", "No"] },
-                                    { label: "Title Out Note", value: truck.titleOutNote, name: "titleOutNote" },
-                                    { label: "Comments", value: truck.comments, name: "comments", isTextarea: true },
-                                ].map(({ label, value, name, type = "text", isSelect = false, options = [], isTextarea = false }) => (
-                                    <div className="col-md-4 mb-3" key={name}>
-                                        <Form.Group>
-                                            <Form.Label>{label}</Form.Label>
-                                            {!isSelect && !isTextarea && (
-                                                <Form.Control
-                                                    type={type}
-                                                    name={name}
-                                                    value={value || ''}
-                                                    onChange={handleChange}
-                                                />
-                                            )}
-                                            {isSelect && (
-                                                <Form.Control
-                                                    as="select"
-                                                    name={name}
-                                                    value={value || ''}
-                                                    onChange={handleChange}>
-                                                    <option value="">Select...</option>
-                                                    {options.map(option => (
-                                                        <option key={option} value={option}>{option}</option>
-                                                    ))}
-                                                </Form.Control>
-                                            )}
-                                            {isTextarea && (
-                                                <Form.Control
-                                                    as="textarea"
-                                                    name={name}
-                                                    value={value || ''}
-                                                    onChange={handleChange}
-                                                    rows={3}
-                                                />
-                                            )}
-                                        </Form.Group>
-                                    </div>
+          <Card className="shadow mb-4">
+            <Card.Header className="d-flex justify-content-between align-items-center">
+              <h5>Truck Information</h5>
+              <Button onClick={() => setEditable(!editable)} variant={editable ? "danger" : "primary"}>
+                {editable ? "Cancel Edit" : "Edit"}
+              </Button>
+            </Card.Header>
+          </Card>
+          {!editable ? (
+            // Condensed view with tables side by side
+            <div className="d-flex flex-wrap justify-content-between">
+              {fieldGroups.map((group, index) => (
+                <Card key={index} className="mb-4 flex-fill me-2" style={{ maxWidth: "24%" }}>
+                  <Card.Header><h6>{group.title}</h6></Card.Header>
+                  <Card.Body>
+                    {group.fields.map((field, idx) => (
+                      <div key={idx} className="mb-2">
+                        <strong>{field.label}:</strong> {truck[field.name] || 'N/A'}
+                      </div>
+                    ))}
+                  </Card.Body>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            // Editable view with full details
+            <Form onSubmit={handleSubmit}>
+              <div className="row">
+                {fieldGroups.map((group, index) => (
+                  <div className="col-md-6" key={index}>
+                    <Card className="mb-4">
+                      <Card.Header><h6>{group.title}</h6></Card.Header>
+                      <Card.Body>
+                        {group.fields.map((field, idx) => (
+                          <Form.Group className="mb-3" key={idx}>
+                            <Form.Label>{field.label}</Form.Label>
+                            {field.type === 'select' ? (
+                              <Form.Select name={field.name} value={truck[field.name] || ""} onChange={handleChange} disabled={!editable}>
+                                <option value="">Select...</option>
+                                {field.options.map(option => (
+                                  <option key={option} value={option}>{option}</option>
                                 ))}
-                            </div>
-                            {editable && (
-                                <div className="text-center">
-                                    <Button type="submit" variant="success" size="lg">
-                                        Save Changes
-                                    </Button>
-                                </div>
+                              </Form.Select>
+                            ) : (
+                              <Form.Control type={field.type} name={field.name} value={truck[field.name] || ""} onChange={handleChange} disabled={!editable} />
                             )}
-                        </fieldset>
-                    </Form>
-                </Card.Body>
-            </Card>
+                          </Form.Group>
+                        ))}
+                      </Card.Body>
+                    </Card>
+                  </div>
+                ))}
+              </div>
+              <Button variant="success" type="submit">
+                Save Changes
+              </Button>
+            </Form>
+          )}
         </Container>
-    );
+      );
+      
 };
 
 export default TruckInfo;
