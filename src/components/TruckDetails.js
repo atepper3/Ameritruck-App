@@ -7,7 +7,8 @@ import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import CommissionList from './CommissionList';
 import CommissionCalculator from './CommissionCalculator';
-import TruckInfo from './TruckInfo'; // Make sure this import points to your TruckInfo component
+import TruckInfo from './TruckInfo'; 
+import '../styles/Custom-styles.css';
 
 const TruckDetails = () => {
     const { id } = useParams();
@@ -97,14 +98,7 @@ const TruckDetails = () => {
       }
 
     return (
-        <div className="container mt-4">
-            {/* Truck Details Heading */}
-            <div className="mb-4">
-                <h2>
-                    {truck.truckinfo && truck.truckinfo.stockNumber && `Stock #${truck.truckinfo.stockNumber} `}&nbsp;&nbsp;&nbsp;
-                    {`${truck.truckinfo.year || ''} ${truck.truckinfo.make || ''} ${truck.truckinfo.model || ''} ${truck.truckinfo.classification ? `- ${truck.truckinfo.classification}` : ''}`}
-                </h2>
-            </div>  
+        <div className="container mt-2">
             <Tabs defaultActiveKey="truckInfo" id="truck-details-tabs" className="mb-3">
                 <Tab eventKey="truckInfo" title="Truck Info">
                     <TruckInfo />

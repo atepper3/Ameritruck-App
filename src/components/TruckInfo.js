@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { Button, Form, Container, Card, Table } from 'react-bootstrap';
+import { Button, Form, Container, Card, Row, Col } from 'react-bootstrap';
+import { useTruck } from '../TruckContext';
 
 const TruckInfo = () => {
     const { id } = useParams();
     const [truck, setTruck] = useState({});
     const [editable, setEditable] = useState(false);
+    const { setTruckDetails } = useTruck(); // Use the method from context to update global state
 
     useEffect(() => {
         const fetchTruckInfo = async () => {
@@ -15,14 +17,23 @@ const TruckInfo = () => {
             const truckSnap = await getDoc(truckRef);
 
             if (truckSnap.exists() && truckSnap.data().truckinfo) {
-                setTruck(truckSnap.data().truckinfo);
+                const truckInfo = truckSnap.data().truckinfo;
+                setTruck(truckInfo);
+                // Correctly update the context with truck details
+                setTruckDetails({
+                    stockNumber: truckInfo.stockNumber,
+                    year: truckInfo.year,
+                    make: truckInfo.make,
+                    model: truckInfo.model,
+                });
             } else {
                 console.log("No truck information found!");
             }
         };
 
         fetchTruckInfo();
-    }, [id]);
+    }, [id, setTruck, setTruckDetails]);
+    
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -99,68 +110,100 @@ const TruckInfo = () => {
 
 
     return (
-        <Container className="mt-4">
-          <Card className="shadow mb-4">
-            <Card.Header className="d-flex justify-content-between align-items-center">
-              <h5>Truck Information</h5>
-              <Button onClick={() => setEditable(!editable)} variant={editable ? "danger" : "primary"}>
-                {editable ? "Cancel Edit" : "Edit"}
-              </Button>
-            </Card.Header>
-          </Card>
-          {!editable ? (
-            // Condensed view with tables side by side
-            <div className="d-flex flex-wrap justify-content-between">
-              {fieldGroups.map((group, index) => (
-                <Card key={index} className="mb-4 flex-fill me-2" style={{ maxWidth: "24%" }}>
-                  <Card.Header><h6>{group.title}</h6></Card.Header>
-                  <Card.Body>
-                    {group.fields.map((field, idx) => (
-                      <div key={idx} className="mb-2">
-                        <strong>{field.label}:</strong> {truck[field.name] || 'N/A'}
-                      </div>
+        <Container fluid className="mt-2">
+            <Form onSubmit={handleSubmit} className="text-small">
+                {/* First Row: Truck Identification and Purchase */}
+                <Row xs={1} md={2} className="g-2 mb-2">
+                    {fieldGroups.slice(0, 2).map((group, index) => (
+                        <Col key={index}>
+                            <Card className="h-100">
+                                <Card.Header as="h6" className="small">{group.title}</Card.Header>
+                                <Card.Body className="p-2">
+                                    {group.fields.map((field, idx) => (
+                                        <Form.Group as={Row} className="mb-1" key={idx}>
+                                            <Form.Label column xs="5" className="small">{field.label}:</Form.Label>
+                                            <Col xs="7">
+                                                {field.type === 'select' ? (
+                                                    <Form.Select 
+                                                        size="sm"
+                                                        name={field.name} 
+                                                        value={truck[field.name] || ""} 
+                                                        onChange={handleChange} 
+                                                        className="small">
+                                                        <option value="">Select...</option>
+                                                        {field.options.map(option => (
+                                                            <option key={option} value={option}>{option}</option>
+                                                        ))}
+                                                    </Form.Select>
+                                                ) : (
+                                                    <Form.Control 
+                                                        size="sm"
+                                                        type={field.type === 'textarea' ? undefined : field.type}
+                                                        as={field.type === 'textarea' ? 'textarea' : undefined}
+                                                        name={field.name} 
+                                                        value={truck[field.name] || ""} 
+                                                        onChange={handleChange}
+                                                        rows={field.type === 'textarea' ? 2 : undefined} 
+                                                        className="small"/>
+                                                )}
+                                            </Col>
+                                        </Form.Group>
+                                    ))}
+                                </Card.Body>
+                            </Card>
+                        </Col>
                     ))}
-                  </Card.Body>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            // Editable view with full details
-            <Form onSubmit={handleSubmit}>
-              <div className="row">
-                {fieldGroups.map((group, index) => (
-                  <div className="col-md-6" key={index}>
-                    <Card className="mb-4">
-                      <Card.Header><h6>{group.title}</h6></Card.Header>
-                      <Card.Body>
-                        {group.fields.map((field, idx) => (
-                          <Form.Group className="mb-3" key={idx}>
-                            <Form.Label>{field.label}</Form.Label>
-                            {field.type === 'select' ? (
-                              <Form.Select name={field.name} value={truck[field.name] || ""} onChange={handleChange} disabled={!editable}>
-                                <option value="">Select...</option>
-                                {field.options.map(option => (
-                                  <option key={option} value={option}>{option}</option>
-                                ))}
-                              </Form.Select>
-                            ) : (
-                              <Form.Control type={field.type} name={field.name} value={truck[field.name] || ""} onChange={handleChange} disabled={!editable} />
-                            )}
-                          </Form.Group>
-                        ))}
-                      </Card.Body>
-                    </Card>
-                  </div>
-                ))}
-              </div>
-              <Button variant="success" type="submit">
-                Save Changes
-              </Button>
+                </Row>
+                {/* Second Row: Sale Information and Additional Info */}
+                <Row xs={1} md={2} className="g-2">
+                    {fieldGroups.slice(2, 4).map((group, index) => (
+                        <Col key={index + 2}>
+                            <Card className="mb-3">
+                                <Card.Header as="h6" className="small">{group.title}</Card.Header>
+                                <Card.Body className="p-2">
+                                    {group.fields.map((field, idx) => (
+                                        <Form.Group as={Row} className="mb-1" key={idx}>
+                                            <Form.Label column xs="5" className="small">{field.label}:</Form.Label>
+                                            <Col xs="7">
+                                                {field.type === 'select' ? (
+                                                    <Form.Select 
+                                                        size="sm"
+                                                        name={field.name} 
+                                                        value={truck[field.name] || ""} 
+                                                        onChange={handleChange} 
+                                                        className="small">
+                                                        <option value="">Select...</option>
+                                                        {field.options.map(option => (
+                                                            <option key={option} value={option}>{option}</option>
+                                                        ))}
+                                                    </Form.Select>
+                                                ) : (
+                                                    <Form.Control 
+                                                        size="sm"
+                                                        type={field.type === 'textarea' ? undefined : field.type}
+                                                        as={field.type === 'textarea' ? 'textarea' : undefined}
+                                                        name={field.name} 
+                                                        value={truck[field.name] || ""} 
+                                                        onChange={handleChange}
+                                                        rows={field.type === 'textarea' ? 2 : undefined} 
+                                                        className="small"/>
+                                                )}
+                                            </Col>
+                                        </Form.Group>
+                                    ))}
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
+                <div className="d-grid gap-2">
+                    <Button variant="success" size="sm" className="mt-2">Save Changes</Button>
+                </div>
             </Form>
-          )}
         </Container>
-      );
-      
+
+
+    );
 };
 
 export default TruckInfo;

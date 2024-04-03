@@ -152,4 +152,15 @@ h2 {
   background-color: #007bff; /* Primary button color, adjust as needed */
 }
 
+/* Ensure this selector is unique and not overridden by Bootstrap */
+#truck-details-tabs {
+  margin-top: -20px; /* Adjust as needed */
+  margin-bottom: 10px; /* Adjust as needed */
+  display: flex;
+  justify-content: center;
+}
 
+/* For the nav-link within the tabs */
+#truck-details-tabs .nav-link {
+  padding: 0.5rem 1rem; /* Adjust as needed */
+}
