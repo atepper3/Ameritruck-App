@@ -23,10 +23,16 @@ const Navigation = () => {
             <NavDropdown.Item href="/contacts">Manage Contacts</NavDropdown.Item>
           </NavDropdown>
         </Nav>
-        {truckDetails && (
-          <div className="ms-auto text-white" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
-            {`Stock #${truckDetails.stockNumber || ''} - ${truckDetails.year || ''} ${truckDetails.make || ''} ${truckDetails.model || ''}`}
-          </div>
+{truckDetails && (
+      <div className="ms-auto d-flex align-items-center" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+        <span className="text-white mr-3">
+          {`Stock #${truckDetails.stockNumber || ''} - ${truckDetails.year || ''} ${truckDetails.make || ''} ${truckDetails.model || ''}`}
+        </span>
+        <Nav className="ml-auto">
+          <Nav.Link href={`/truck/${truckDetails.id}/info`}>Detailed Info</Nav.Link>
+          <Nav.Link href={`/truck/${truckDetails.id}/expenses`}>Expenses</Nav.Link>
+          <Nav.Link href={`/truck/${truckDetails.id}/commissions`}>Commissions</Nav.Link>
+        </Nav>          </div>
         )}
       </Navbar.Collapse>
     </Navbar>
