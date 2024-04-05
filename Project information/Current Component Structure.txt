@@ -1,0 +1,26 @@
+currently, we have the following components:
+
+AddMultipleTrucksForm.js
+     -This has form fields that add several trucks to the database at once
+CommissionCalculator.js
+     -This performs the math involved in calculating commissions after entered in commission form
+CommissionForm.js
+      -This component creates new commissions
+CommissionList.js
+      -This should be one of the tabs of the truck and displays all commissions related to a specific truck
+ContactsManager.js
+      -Lists and handles the adding of contacts, independent of the truck collection.  However, at some point soon, I will want to implement a way of getting it to talk to the truck collection.  For example, when adding a new truck, having the option to choose the contact and have it auto populate certain pieces of their information in the relevant fields
+ExpenseForm.js
+     -The form that creates new expenses
+ExpenseList.js
+       -The tab that displays the relevant expenses for a certain truck
+Navigation.js
+       -Something we created to display the navbar.  Currently, we have code in there to display information in the center of the navbar if viewing details about the truck.  However, this code might be better served to be placed somewhere else, as currently it doens't always render correctly depending on which component you are in
+TruckDetails.js
+          -the old state management code we used to use.  Should be obsolete now that we are using redux, but potentially some useful code in there
+TruckForm.js
+      -used to add a single truck, similar in purpose to add multiple trucks
+Truckinfo.js
+       -the first page that shows upafter clicking more details on the trucklist page, and displays all the fields about the truck
+Trucklist.js
+          -currently our "homepage" where we list some information about all trucks.

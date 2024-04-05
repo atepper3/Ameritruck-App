@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { db } from '../firebase';
+import { db } from '../../firebase';
 import { collection, query, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { Button, Table, Modal } from 'react-bootstrap';
 import CommissionForm from './CommissionForm';

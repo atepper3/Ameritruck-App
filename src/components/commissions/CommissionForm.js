@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button } from 'react-bootstrap';
-import { db } from '../firebase';
+import { db } from '../../firebase';
 import { doc, addDoc, updateDoc, collection } from 'firebase/firestore';
 
 const CommissionForm = ({ show, handleClose, handleCommissionSubmit, commissionData, truckId }) => {

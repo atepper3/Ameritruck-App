@@ -1,9 +1,9 @@
 import React from 'react';
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
-import { useTruck } from '../TruckContext';
+import { useSelector } from 'react-redux';
 
 const Navigation = () => {
-  const { truckDetails } = useTruck();
+  const truckDetails = useSelector(state => state.truck.truckInfo);
 
   return (
     <Navbar variant="dark" expand="lg" className="custom-navbar py-1">

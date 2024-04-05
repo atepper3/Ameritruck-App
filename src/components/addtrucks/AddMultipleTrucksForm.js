@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { db } from '../firebase';
+import { db } from '../../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { Button, Form, Container, Row, Col } from 'react-bootstrap';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Table } from 'react-bootstrap';
-import { db } from '../firebase';
+import { db } from '../../firebase';
 import { doc, deleteDoc } from 'firebase/firestore';
 
 const ExpenseList = ({ expenses, truckId, setExpenses, setSelectedExpense, setShowExpenseModal }) => {
