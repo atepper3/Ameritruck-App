@@ -1,8 +1,5 @@
-// src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/Custom-styles.css';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import TruckList from './components/TruckList';
 import TruckInfo from './components/truckinfo/TruckInfo';
 import TruckForm from './components/addtrucks/TruckForm';
@@ -11,24 +8,38 @@ import ContactsManager from './components/contacts/ContactsManager';
 import ExpenseList from './components/expenses/ExpenseList';
 import CommissionList from './components/commissions/CommissionList';
 import { Provider } from 'react-redux';
-import store from './store';
-import Navigation from './components/Navigation'; 
+import { PersistGate } from 'redux-persist/integration/react'; // Import PersistGate
+import { store, persistor } from './store'; // Make sure this path is correct
+import Navigation from './components/navigation/Navigation';
+import SecondaryNavbar from './components/navigation/SecondaryNavbar';
+
+function ConditionalSecondaryNavbar() {
+  const location = useLocation();
+  const paths = ['/truck/:id/info', '/truck/:id/expenses', '/truck/:id/commissions'];
+  const shouldShowSecondaryNavbar = paths.some(path =>
+    new RegExp(path.replace(':id', '[^/]+')).test(location.pathname));
+
+  return shouldShowSecondaryNavbar ? <SecondaryNavbar /> : null;
+}
 
 function App() {
   return (
     <Provider store={store}>
-      <Router>
-        <Navigation /> {/* Navigation is now within the TruckProvider scope */}
-        <Routes>
-          <Route path="/truck-list" element={<div className="container-fluid mt-3"><TruckList /></div>} />
-          <Route path="/add-truck" element={<div className="container mt-3"><TruckForm /></div>} />
-          <Route path="/truck/:id/info" element={<div className="container mt-3"><TruckInfo /></div>} />
-          <Route path="/truck/:id/expenses" element={<div className="container mt-3"><ExpenseList /></div>} />
-          <Route path="/truck/:id/commissions" element={<div className="container mt-3"><CommissionList /></div>} />
-          <Route path="/add-multiple-trucks" element={<div className="container mt-3"><AddMultipleTrucksForm /></div>} />
-          <Route path="/contacts" element={<ContactsManager />} />
-        </Routes>
-      </Router>
+      <PersistGate loading={null} persistor={persistor}>
+        <Router>
+          <Navigation />
+          <ConditionalSecondaryNavbar />
+          <Routes>
+            <Route path="/truck-list" element={<div className="container-fluid mt-3"><TruckList /></div>} />
+            <Route path="/add-truck" element={<div className="container mt-3"><TruckForm /></div>} />
+            <Route path="/truck/:id/info" element={<div className="container mt-3"><TruckInfo /></div>} />
+            <Route path="/truck/:id/expenses" element={<div className="container mt-3"><ExpenseList /></div>} />
+            <Route path="/truck/:id/commissions" element={<div className="container mt-3"><CommissionList /></div>} />
+            <Route path="/add-multiple-trucks" element={<div className="container mt-3"><AddMultipleTrucksForm /></div>} />
+            <Route path="/contacts" element={<ContactsManager />} />
+          </Routes>
+        </Router>
+      </PersistGate>
     </Provider>
   );
 }

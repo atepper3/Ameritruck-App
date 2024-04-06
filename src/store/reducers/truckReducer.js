@@ -3,10 +3,15 @@ import {
   SET_EXPENSES,
   ADD_EXPENSE,
   DELETE_EXPENSE,
+  UPDATE_EXPENSE,
   SET_COMMISSIONS,
   ADD_COMMISSION,
   DELETE_COMMISSION,
-  SET_TRUCK_LIST
+  UPDATE_COMMISSION,
+  SET_TRUCK_LIST,
+  SHOW_EXPENSE_MODAL,
+  HIDE_EXPENSE_MODAL,
+  SET_CURRENT_EXPENSE,
 } from '../actions/actionTypes';
 
 const initialState = {
@@ -43,6 +48,31 @@ const truckReducer = (state = initialState, action) => {
         ...state,
         expenses: state.expenses.filter(expense => expense.id !== action.payload)
       };
+    case UPDATE_EXPENSE: {
+      const updatedExpenses = state.expenses.map(expense =>
+        expense.id === action.payload.expenseId ? { ...expense, ...action.payload.expenseData } : expense
+      );
+
+      return {
+        ...state,
+        expenses: updatedExpenses,
+      };
+    }
+    case SHOW_EXPENSE_MODAL:
+    return {
+      ...state,
+      isExpenseModalOpen: true,
+    };
+    case HIDE_EXPENSE_MODAL:
+      return {
+        ...state,
+        isExpenseModalOpen: false,
+      };
+    case SET_CURRENT_EXPENSE:
+      return {
+        ...state,
+        currentExpense: action.payload,
+      };
     case SET_COMMISSIONS:
       return {
         ...state,
@@ -53,14 +83,23 @@ const truckReducer = (state = initialState, action) => {
         ...state,
         commissions: [...state.commissions, action.payload]
       };
-    case DELETE_COMMISSION:
-      return {
-        ...state,
-        commissions: state.commissions.filter(commission => commission.id !== action.payload)
-      };
-    default:
-      return state;
-  }
-};
-
-export default truckReducer;
+      case DELETE_COMMISSION:
+        // Assuming the payload is the commissionId to delete
+        return {
+          ...state,
+          commissions: state.commissions.filter(commission => commission.id !== action.payload),
+        };
+      case UPDATE_COMMISSION:
+        // Assuming the payload includes { id, ...commissionData }
+        return {
+          ...state,
+          commissions: state.commissions.map(commission =>
+            commission.id === action.payload.id ? { ...commission, ...action.payload.commissionData } : commission
+          ),
+        };
+      default:
+        return state;
+    }
+  };
+  
+  export default truckReducer;

@@ -1,0 +1,34 @@
+.secondary-navbar {
+  position: relative; /* Establish relative positioning */
+  display: flex;
+  justify-content: center; /* Center the truck info */
+  padding: 4px 20px;
+  background-color: var(--darker-bg);
+  border-bottom: 1px solid var(--lighter-gray);
+}
+
+.truck-info {
+  text-align: center;
+  color: var(--font-color);
+  font-weight: bold;
+  /* Ensure the content does not go under the nav-links */
+  padding-right: 160px; /* Adjust this value based on the width of your nav-links */
+}
+
+.nav-links {
+  position: absolute; /* Absolute position the links to the right */
+  right: 20px; /* Align to the right, with some padding */
+  top: 50%; /* Start at 50% from the top */
+  transform: translateY(-50%); /* Center it vertically */
+}
+
+.nav-links a {
+  margin: 0 10px;
+  color: var(--font-color);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.nav-links a:hover {
+  color: var(--accent-color);
+}

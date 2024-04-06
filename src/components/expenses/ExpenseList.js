@@ -1,32 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Table } from 'react-bootstrap';
-import { db } from '../../firebase';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { fetchExpenses, deleteExpense, setCurrentExpense, showExpenseModal } from '../../store/actions/truckActions';
+import ExpenseForm from './ExpenseForm'; // Make sure to import ExpenseForm
 
-const ExpenseList = ({ expenses, truckId, setExpenses, setSelectedExpense, setShowExpenseModal }) => {
-    const handleDeleteExpense = async (expenseId) => {
-        if (window.confirm('Are you sure you want to delete this expense?')) {
-            try {
-                await deleteDoc(doc(db, 'trucks', truckId, 'expenses', expenseId));
-                setExpenses(currentExpenses => currentExpenses.filter(expense => expense.id !== expenseId));
-            } catch (error) {
-                console.error('Error deleting expense:', error);
-                alert('Failed to delete expense.');
-            }
-        }
-    };
+const ExpenseList = () => {
+    const { id: truckId } = useParams();
+    const dispatch = useDispatch();
+    const expenses = useSelector(state => state.truck.expenses);
+    const isExpenseModalOpen = useSelector(state => state.truck.isExpenseModalOpen); // Assuming you have this in your state
+
+    useEffect(() => {
+        dispatch(fetchExpenses(truckId));
+    }, [dispatch, truckId]);
 
     const handleEditExpense = (expense) => {
-        setSelectedExpense(expense);
-        setShowExpenseModal(true);
+        dispatch(setCurrentExpense(expense));
+        dispatch(showExpenseModal());
     };
 
-    // Calculate the total expenses
+    const handleDeleteExpense = (expenseId) => {
+        dispatch(deleteExpense(truckId, expenseId));
+    };
+
+    const handleAddExpense = () => {
+        dispatch(setCurrentExpense(null)); // Clear current expense to signify adding a new one
+        dispatch(showExpenseModal());
+    };
+
     const totalExpenses = expenses.reduce((acc, expense) => acc + parseFloat(expense.cost || 0), 0);
 
     return (
         <>
-            <Table striped bordered hover size="sm" className="mb-3 table-dark"> {/* Add table-dark class here */}
+            <Button onClick={handleAddExpense}>Add Expense</Button>
+            <ExpenseForm show={isExpenseModalOpen} />
+            <Table striped bordered hover size="sm" className="mb-3 table-dark">
                 <thead>
                     <tr>
                         <th>Category</th>

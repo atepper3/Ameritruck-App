@@ -1,59 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Modal, Form, Button } from 'react-bootstrap';
-import { db } from '../firebase';
-import { doc, addDoc, updateDoc, collection } from 'firebase/firestore';
+import { addExpense, updateExpense, hideExpenseModal } from '../../store/actions/truckActions';
 
-const ExpenseForm = ({ show, handleClose, expense, truckId, updateExpenses }) => {
-  const [formState, setFormState] = useState({
-    category: '',
-    descriptionOfWork: '',
-    vendor: '',
-    cost: '',
-    dateEntered: '',
-    paidOnDate: '',
-  });
+// Initial form state for resetting
+const initialFormState = {
+  category: '',
+  descriptionOfWork: '',
+  vendor: '',
+  cost: '',
+  dateEntered: '',
+  paidOnDate: '',
+};
 
+const ExpenseForm = () => {
+  const dispatch = useDispatch();
+  const { currentExpense, isExpenseModalOpen, truckInfo } = useSelector(state => state.truck);
+  const [formState, setFormState] = useState(initialFormState);
+
+  // Populate form when editing an expense
   useEffect(() => {
-    if (expense) {
-      setFormState(expense);
+    if (currentExpense) {
+      setFormState(currentExpense);
     } else {
-      setFormState({
-        category: '',
-        descriptionOfWork: '',
-        vendor: '',
-        cost: '',
-        dateEntered: '',
-        paidOnDate: '',
-      });
+      setFormState(initialFormState); // Reset form when adding a new expense
     }
-  }, [expense]);
+  }, [currentExpense, isExpenseModalOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormState(prevState => ({ ...prevState, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      if (expense) {
-        await updateDoc(doc(db, 'trucks', truckId, 'expenses', expense.id), formState);
-      } else {
-        await addDoc(collection(db, 'trucks', truckId, 'expenses'), formState);
-      }
-      handleClose();
-    } catch (error) {
-      console.error('Error saving expense:', error);
-      alert('Failed to save expense.');
+    if (currentExpense) {
+      dispatch(updateExpense(truckInfo.id, currentExpense.id, formState));
+    } else {
+      dispatch(addExpense(truckInfo.id, formState));
     }
+    closeModal();
+  };
+
+  // Close modal and reset form state
+  const closeModal = () => {
+    dispatch(hideExpenseModal());
+    setFormState(initialFormState);
   };
 
   return (
-    <Modal show={show} onHide={handleClose} dialogClassName="modal-dark"> {/* Add a custom class name */}
-      <Modal.Header closeButton className="modal-dark-header"> {/* Add a custom class name */}
-        <Modal.Title>{expense ? 'Edit Expense' : 'Add Expense'}</Modal.Title>
+    <Modal show={isExpenseModalOpen} onHide={closeModal}>
+      <Modal.Header closeButton className="modal-dark-header">
+        <Modal.Title>{currentExpense ? 'Edit Expense' : 'Add Expense'}</Modal.Title>
       </Modal.Header>
-      <Modal.Body className="modal-dark-body"> {/* Add a custom class name */}
+      <Modal.Body className="modal-dark-body">
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
             <Form.Label>Category</Form.Label>
@@ -132,9 +132,8 @@ const ExpenseForm = ({ show, handleClose, expense, truckId, updateExpenses }) =>
               onChange={handleChange}
             />
           </Form.Group>
-          <Button variant="primary" type="submit">
-            {expense ? 'Update Expense' : 'Add Expense'}
-          </Button>
+          <Button variant="secondary" onClick={closeModal} className="me-2">Cancel</Button>
+          <Button variant="primary" type="submit">{currentExpense ? 'Update Expense' : 'Add Expense'}</Button>
         </Form>
       </Modal.Body>
     </Modal>
