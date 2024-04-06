@@ -5,11 +5,13 @@ import {
   DELETE_EXPENSE,
   SET_COMMISSIONS,
   ADD_COMMISSION,
-  DELETE_COMMISSION
+  DELETE_COMMISSION,
+  SET_TRUCK_LIST
 } from '../actions/actionTypes';
 
 const initialState = {
   truckInfo: null,
+  truckList: [],
   expenses: [],
   commissions: []
 };
@@ -20,6 +22,11 @@ const truckReducer = (state = initialState, action) => {
       return {
         ...state,
         truckInfo: action.payload
+      };
+    case SET_TRUCK_LIST:
+      return {
+        ...state,
+        truckList: action.payload
       };
     case SET_EXPENSES:
       return {

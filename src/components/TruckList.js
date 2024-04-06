@@ -1,48 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { db } from "../firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchTruckList } from "../store/actions/truckActions";
 import { Card, CardHeader, CardBody, Row, Col } from "reactstrap";
 
 const TruckList = () => {
-  const [trucks, setTrucks] = useState([]);
+  const dispatch = useDispatch();
+  const trucks = useSelector((state) => state.truck.truckList);
 
   useEffect(() => {
-    const fetchTrucks = async () => {
-      const truckInfoQuery = query(
-        collection(db, "trucks"),
-        where("truckinfo", "!=", null)
-      );
-      const querySnapshot = await getDocs(truckInfoQuery);
-
-      const trucksArray = querySnapshot.docs.map((doc) => {
-        const truckData = doc.data().truckinfo;
-
-        return {
-          id: doc.id,
-          ...truckData,
-          purchaseDate: truckData.purchaseDate
-            ? formatDate(truckData.purchaseDate)
-            : "",
-          saleDate: truckData.saleDate ? formatDate(truckData.saleDate) : "",
-          fundedDate: truckData.fundedDate
-            ? formatDate(truckData.fundedDate)
-            : "",
-          vinSerial: truckData.vinSerial ? formatVIN(truckData.vinSerial) : "",
-          purchasePrice: truckData.purchasePrice
-            ? formatPrice(truckData.purchasePrice)
-            : "",
-          soldPrice: truckData.soldPrice
-            ? formatPrice(truckData.soldPrice)
-            : "",
-        };
-      });
-
-      setTrucks(trucksArray);
-    };
-
-    fetchTrucks();
-  }, []);
+    dispatch(fetchTruckList());
+  }, [dispatch]);
 
   const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString();
   const formatVIN = (vin) => (vin ? vin.slice(-6) : "");
