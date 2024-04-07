@@ -1,21 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Modal, Form, Button } from 'react-bootstrap';
-import { addExpense, updateExpense, hideExpenseModal } from '../../store/actions/truckActions';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Modal, Form, Button } from "react-bootstrap";
+import {
+  addExpense,
+  updateExpense,
+  hideExpenseModal,
+} from "../../store/actions/truckActions";
 
 // Initial form state for resetting
 const initialFormState = {
-  category: '',
-  descriptionOfWork: '',
-  vendor: '',
-  cost: '',
-  dateEntered: '',
-  paidOnDate: '',
+  category: "",
+  descriptionOfWork: "",
+  vendor: "",
+  cost: "",
+  dateEntered: "",
+  paidOnDate: "",
 };
 
 const ExpenseForm = () => {
   const dispatch = useDispatch();
-  const { currentExpense, isExpenseModalOpen, truckInfo } = useSelector(state => state.truck);
+  const { currentExpense, isExpenseModalOpen, truckInfo } = useSelector(
+    (state) => state.truck
+  );
   const [formState, setFormState] = useState(initialFormState);
 
   // Populate form when editing an expense
@@ -29,7 +35,7 @@ const ExpenseForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormState(prevState => ({ ...prevState, [name]: value }));
+    setFormState((prevState) => ({ ...prevState, [name]: value }));
   };
 
   const handleSubmit = (e) => {
@@ -51,9 +57,11 @@ const ExpenseForm = () => {
   return (
     <Modal show={isExpenseModalOpen} onHide={closeModal}>
       <Modal.Header closeButton className="modal-dark-header">
-        <Modal.Title>{currentExpense ? 'Edit Expense' : 'Add Expense'}</Modal.Title>
+        <Modal.Title>
+          {currentExpense ? "Edit Expense" : "Add Expense"}
+        </Modal.Title>
       </Modal.Header>
-      <Modal.Body className="modal-dark-body">
+      <Modal.Body className="modal-dark">
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
             <Form.Label>Category</Form.Label>
@@ -132,8 +140,12 @@ const ExpenseForm = () => {
               onChange={handleChange}
             />
           </Form.Group>
-          <Button variant="secondary" onClick={closeModal} className="me-2">Cancel</Button>
-          <Button variant="primary" type="submit">{currentExpense ? 'Update Expense' : 'Add Expense'}</Button>
+          <Button variant="secondary" onClick={closeModal} className="me-2">
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit">
+            {currentExpense ? "Update Expense" : "Add Expense"}
+          </Button>
         </Form>
       </Modal.Body>
     </Modal>

@@ -1,11 +1,11 @@
 :root {
-  --dark-bg: #121212;
-  --darker-bg: #0a0a0a;
-  --lighter-gray: #2a2a2a; /* Lighter gray for alternating table rows */
-  --dark-gray: #1c1c1c; /* Dark gray for table headers and other elements */
-  --font-color: #ffffff;
-  --accent-color: #306998; /* Accent color for buttons and links */
-  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --dark-bg: #121212; /* Slightly lighter dark background for improved readability */
+  --darker-bg: #0d0d0d; /* Very dark background for elements needing to stand out */
+  --lighter-gray: #343434; /* Lighter gray for alternating table rows and providing contrast */
+  --dark-gray: #1e1e1e; /* Dark gray for table headers and card headers for subtle differentiation */
+  --font-color: #e0e0e0; /* Light gray font color for better readability on dark backgrounds */
+  --accent-color: #4a90e2; /* Brighter blue for buttons and links to stand out */
+  --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
@@ -26,7 +26,7 @@ body {
 }
 
 .card-header h2.mb-0 {
-  color: var(--font-color); 
+  color: var(--font-color);
 }
 
 .table-dark {
@@ -68,13 +68,16 @@ h2 {
   font-size: 1.5rem; /* Adjust size as needed */
 }
 
-.form-control, .form-select, .btn-primary {
+.form-control,
+.form-select,
+.btn-primary {
   background-color: var(--darker-bg);
   color: var(--font-color);
   border: 1px solid var(--lighter-gray);
 }
 
-.form-control:disabled, .form-select:disabled {
+.form-control:disabled,
+.form-select:disabled {
   background-color: var(--darker-bg);
   color: var(--font-color);
   border: 1px solid var(--lighter-gray);
@@ -106,6 +109,10 @@ h2 {
   color: #fff;
 }
 
+.modal-dark {
+  background-color: #333;
+  color: #fff;
+}
 
 .modal-dark .modal-content {
   background-color: #333;
@@ -116,6 +123,15 @@ h2 {
   color: #fff;
 }
 
+.modal-dark-header {
+  background-color: #222;
+  color: #fff;
+}
+
+.modal-dark-header_ExpenseForm {
+  color: #171717;
+}
+
 .modal-dark-body .form-control {
   background-color: #222;
   border: 1px solid #555;
@@ -123,44 +139,44 @@ h2 {
 }
 
 .custom-dark-button {
-  background-color: #0062cc;
-  border-color: #005cbf;
+  background-color: #007bff; /* Slightly brighter for visibility */
+  border-color: #006bee; /* Adjusted for coherence */
 }
 
 /* Hover states for the custom dark button */
 .custom-dark-button:hover {
-  background-color: #0056b3;
-  border-color: #004ba0;
+  background-color: #005ecb;
+  border-color: #0051b5;
 }
 
 .custom-modal .modal-content {
-  background-color: #333; /* Dark background for the modal content */
-  color: white; /* White text color */
+  background-color: #333; /* Adjusted for uniformity */
+  color: white; /* Ensured readability */
 }
 
-.custom-modal .form-control, .custom-modal .form-select {
-  background-color: #222; /* Darker background for form inputs */
-  border: 1px solid #555; /* Darker border for inputs */
-  color: white; /* White text color for inputs */
+.custom-modal .form-control,
+.custom-modal .form-select {
+  background-color: #222; /* Ensured contrast and readability */
+  border: 1px solid #555; /* Maintained coherence */
+  color: white; /* Ensured readability */
 }
 
 .custom-modal .btn-secondary {
-  background-color: #555; /* Darker background for the secondary button */
+  background-color: #555; /* Darkened for contrast */
 }
 
 .custom-modal .btn-primary {
-  background-color: #007bff; /* Primary button color, adjust as needed */
+  background-color: #007bff; /* Kept for brand consistency, adjust if necessary */
 }
 
-/* Ensure this selector is unique and not overridden by Bootstrap */
+/* Adjustments for specific elements to ensure uniformity and readability */
 #truck-details-tabs {
-  margin-top: -20px; /* Adjust as needed */
-  margin-bottom: 10px; /* Adjust as needed */
+  margin-top: -20px; /* Kept for layout consistency */
+  margin-bottom: 10px; /* Kept for spacing */
   display: flex;
   justify-content: center;
 }
 
-/* For the nav-link within the tabs */
 #truck-details-tabs .nav-link {
-  padding: 0.5rem 1rem; /* Adjust as needed */
+  padding: 0.5rem 1rem; /* Adjusted padding for readability */
 }
