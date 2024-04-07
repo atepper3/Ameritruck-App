@@ -1,0 +1,21 @@
+/* TruckInfo.css */
+.truck-info-card {
+  background-color: var(--darker-bg);
+  color: var(--font-color);
+  border: 1px solid var(--lighter-gray);
+}
+
+.truck-info-card * {
+  text-align: left; /* This will ensure everything inside the card aligns left */
+}
+
+.truck-info-card-header {
+  background-color: var(--dark-gray);
+  color: var(--font-color);
+}
+
+/* Explicitly targeting selects and inputs within truck-info-card to ensure left alignment */
+.truck-info-card .form-control,
+.truck-info-card .form-select {
+  text-align: left;
+}

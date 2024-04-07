@@ -1,10 +1,10 @@
 :root {
-  --dark-bg: #121212; /* Slightly lighter dark background for improved readability */
-  --darker-bg: #0d0d0d; /* Very dark background for elements needing to stand out */
-  --lighter-gray: #343434; /* Lighter gray for alternating table rows and providing contrast */
-  --dark-gray: #1e1e1e; /* Dark gray for table headers and card headers for subtle differentiation */
-  --font-color: #e0e0e0; /* Light gray font color for better readability on dark backgrounds */
-  --accent-color: #4a90e2; /* Brighter blue for buttons and links to stand out */
+  --dark-bg: #1a1a1a; /* Lightened from #121212 to a slightly lighter dark shade */
+  --darker-bg: #141414; /* Adjusted to a less intense dark for differentiation */
+  --lighter-gray: #404040; /* Lighter gray for more visible contrast */
+  --dark-gray: #2c2c2c; /* Less intense dark gray for improved readability */
+  --font-color: #f0f0f0; /* A brighter shade of white for better readability */
+  --accent-color: #5aa9e6; /* A lighter, more vibrant blue for accent elements */
   --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -14,19 +14,21 @@ body {
   font-family: var(--font-family);
 }
 
-.card {
-  border: none;
+.card,
+.modal-content,
+.form-control,
+.form-select {
   background-color: var(--darker-bg);
+  color: var(--font-color);
+  border: 1px solid var(--lighter-gray);
+  text-align: center;
 }
 
-.card-header {
+.card-header,
+.table-dark thead th {
   background-color: var(--dark-gray);
-  border-bottom: 1px solid var(--lighter-gray);
   color: var(--font-color);
-}
-
-.card-header h2.mb-0 {
-  color: var(--font-color);
+  text-align: center;
 }
 
 .table-dark {
@@ -34,149 +36,62 @@ body {
   border-spacing: 0;
 }
 
-.table-dark thead th {
-  background-color: var(--dark-gray);
-  border-bottom: 2px solid var(--darker-bg);
-  text-transform: uppercase;
-  font-size: 0.9rem;
-}
-
 .table-dark tbody tr:nth-of-type(odd) {
   background-color: var(--darker-bg);
 }
 
-.table-dark tbody tr:nth-of-type(even) {
+.table-dark tbody tr:nth-of-type(even),
+.table-dark tbody tr:hover {
   background-color: var(--lighter-gray);
 }
 
-.table-dark tbody tr:hover {
-  background-color: var(--dark-gray);
-}
-
-.btn-custom {
+.btn-custom,
+.btn-primary,
+.custom-dark-button {
   background-color: var(--accent-color);
   border: none;
   color: var(--font-color);
 }
 
-.btn-custom:hover {
-  background-color: lighten(var(--accent-color), 10%);
-}
-
-/* Responsive text sizing */
-h2 {
-  font-size: 1.5rem; /* Adjust size as needed */
-}
-
-.form-control,
-.form-select,
-.btn-primary {
-  background-color: var(--darker-bg);
-  color: var(--font-color);
-  border: 1px solid var(--lighter-gray);
-}
-
-.form-control:disabled,
-.form-select:disabled {
-  background-color: var(--darker-bg);
-  color: var(--font-color);
-  border: 1px solid var(--lighter-gray);
-}
-
-.form-label {
-  color: var(--font-color);
-}
-
-.btn-primary {
-  background-color: var(--accent-color);
-  border-color: var(--accent-color);
-}
-
-.btn-primary:hover {
-  background-color: lighten(var(--accent-color), 10%);
-}
-
-.dark-modal .form-control {
-  background-color: #333;
-  border: 1px solid #666;
-  color: #fff;
-}
-
-.dark-modal .form-control:focus {
-  background-color: #333;
-  border-color: #555;
-  box-shadow: none;
-  color: #fff;
-}
-
-.modal-dark {
-  background-color: #333;
-  color: #fff;
-}
-
-.modal-dark .modal-content {
-  background-color: #333;
-  color: #ddd;
-}
-
-.modal-dark-header .modal-title {
-  color: #fff;
-}
-
-.modal-dark-header {
-  background-color: #222;
-  color: #fff;
-}
-
-.modal-dark-header_ExpenseForm {
-  color: #171717;
-}
-
-.modal-dark-body .form-control {
-  background-color: #222;
-  border: 1px solid #555;
-  color: #eee;
-}
-
-.custom-dark-button {
-  background-color: #007bff; /* Slightly brighter for visibility */
-  border-color: #006bee; /* Adjusted for coherence */
-}
-
-/* Hover states for the custom dark button */
+.btn-custom:hover,
+.btn-primary:hover,
 .custom-dark-button:hover {
-  background-color: #005ecb;
-  border-color: #0051b5;
+  background-color: lighten(var(--accent-color), 10%);
 }
 
-.custom-modal .modal-content {
-  background-color: #333; /* Adjusted for uniformity */
-  color: white; /* Ensured readability */
+/* Ensure all modals have a uniform dark theme */
+.modal-dark,
+.dark-modal,
+.custom-modal {
+  background-color: var(--darker-bg);
+  color: var(--font-color);
 }
 
-.custom-modal .form-control,
-.custom-modal .form-select {
-  background-color: #222; /* Ensured contrast and readability */
-  border: 1px solid #555; /* Maintained coherence */
-  color: white; /* Ensured readability */
+.modal-dark .modal-header,
+.modal-dark-header,
+.modal-dark-header_ExpenseForm {
+  background-color: var(--dark-gray);
+  color: var(--font-color);
 }
 
-.custom-modal .btn-secondary {
-  background-color: #555; /* Darkened for contrast */
+/* Uniform font and hover styles across the application */
+h2,
+.modal-title {
+  font-size: 1.5rem;
+  color: var(--font-color);
 }
 
-.custom-modal .btn-primary {
-  background-color: #007bff; /* Kept for brand consistency, adjust if necessary */
+.form-label,
+.modal-content {
+  color: var(--font-color);
 }
 
-/* Adjustments for specific elements to ensure uniformity and readability */
-#truck-details-tabs {
-  margin-top: -20px; /* Kept for layout consistency */
-  margin-bottom: 10px; /* Kept for spacing */
+/* General adjustments for layout and readability */
+#truck-details-tabs,
+#truck-details-tabs .nav-link {
   display: flex;
   justify-content: center;
-}
-
-#truck-details-tabs .nav-link {
-  padding: 0.5rem 1rem; /* Adjusted padding for readability */
+  padding: 0.5rem 1rem;
+  margin-top: -20px;
+  margin-bottom: 10px;
 }

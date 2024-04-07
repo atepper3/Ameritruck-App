@@ -56,7 +56,7 @@ const ExpenseForm = () => {
 
   return (
     <Modal show={isExpenseModalOpen} onHide={closeModal}>
-      <Modal.Header closeButton className="modal-dark-header">
+      <Modal.Header closeButton className="modal-dark">
         <Modal.Title>
           {currentExpense ? "Edit Expense" : "Add Expense"}
         </Modal.Title>

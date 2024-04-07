@@ -67,12 +67,12 @@ const TruckList = () => {
                         <td>{truck.fundedDate}</td>
                         <td>{truck.titleIn}</td>
                         <td>
-                        <Link
-                          to={`/truck/${truck.id}/info`}
-                          className="btn btn-custom btn-sm"
-                        >
-                          More Details
-                        </Link>
+                          <Link
+                            to={`/truck/${truck.id}/info`}
+                            className="btn btn-custom btn-sm"
+                          >
+                            More Details
+                          </Link>
                         </td>
                       </tr>
                     ))}
