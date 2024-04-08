@@ -1,102 +1,113 @@
-import React, { useState } from 'react';
-import { db } from '../../firebase';
-import { collection, addDoc } from 'firebase/firestore';
-import { Button, Form, Container, Row, Col } from 'react-bootstrap';
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { truckFormFields } from "./truckFormFields"; // Ensure correct import path
+import { addMultipleTrucks } from "../../store/actions/truckActions";
+import { Button, Form, Container, Row, Col } from "react-bootstrap";
 
 const AddMultipleTrucksForm = () => {
-    const [truckEntries, setTruckEntries] = useState(Array(5).fill(null).map(() => ({})));
+  const [truckEntries, setTruckEntries] = useState(
+    Array(5)
+      .fill(null)
+      .map(() => ({}))
+  );
+  const dispatch = useDispatch();
 
-    const handleAddTruck = () => {
-        setTruckEntries([...truckEntries, {}]);
+  const handleAddTruck = () => {
+    setTruckEntries([...truckEntries, {}]);
+  };
+
+  const handleChange = (entryIndex, key, value) => {
+    const updatedEntries = [...truckEntries];
+    updatedEntries[entryIndex] = {
+      ...updatedEntries[entryIndex],
+      [key]: value,
     };
+    setTruckEntries(updatedEntries);
+  };
 
-    const handleChange = (index, key, value) => {
-        const updatedEntries = [...truckEntries];
-        // Keep the value as is without converting to boolean here
-        updatedEntries[index][key] = value;
-        setTruckEntries(updatedEntries);
-    };     
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    dispatch(addMultipleTrucks(truckEntries));
+    setTruckEntries(
+      Array(5)
+        .fill(null)
+        .map(() => ({}))
+    ); // Reset the form
+  };
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        try {
-            for (const entry of truckEntries) {
-                if (Object.values(entry).some(value => value !== '')) {
-                    await addDoc(collection(db, "trucks"), {
-                        truckinfo: {
-                            ...entry,
-                            // truckHere is directly used without conversion
-                        }
-                    });
-                }
-            }
-            alert("Trucks added successfully!");
-            setTruckEntries(Array(5).fill(null).map(() => ({})));
-        } catch (error) {
-            console.error("Error adding trucks: ", error);
-            alert("Failed to add trucks.");
-        }
-    };
-    
-    
+  // Define the fields to include in this form
+  const relevantFields = [
+    "stockNumber",
+    "fleetNumber",
+    "status",
+    "saleType",
+    "purchaseDate",
+    "purchasedFrom",
+    "purchasePrice",
+    "buyer",
+    "year",
+    "make",
+    "model",
+    "vinSerial",
+    "classification",
+    "location",
+    "truckHere",
+  ];
 
-    return (
-        <Container>
-            <Form onSubmit={handleSubmit}>
-                <h3>Add Multiple Trucks</h3>
-                <Row className="mb-3">
-                    {[
-                        { label: 'Stock Number', key: 'stockNumber' },
-                        { label: 'Fleet Number', key: 'fleetNumber' },
-                        { label: 'Status', key: 'status'},
-                        { label: 'Sale Type', key: 'saleType'},
-                        { label: 'Purchase Date', key: 'purchaseDate'},
-                        { label: 'Purchased From', key: 'purchasedFrom'},
-                        { label: 'Purchase Price', key: 'purchasePrice'},
-                        { label: 'Buyer', key: 'buyer'},
-                        { label: 'Year', key: 'year'},
-                        { label: 'Make', key: 'make'},
-                        { label: 'Model', key: 'model'},
-                        { label: 'VIN/Serial', key: 'vinSerial'},
-                        { label: 'Classification', key: 'classification'},
-                        { label: 'Location', key: 'location'},
-                        { label: 'Truck Here?', key: 'truckHere'},
-                    ].map((field, index) => (
-                        <Row key={index} className="align-items-center">
-                            <Col xs={3}><Form.Label>{field.label}</Form.Label></Col>
-                            {truckEntries.map((_, entryIndex) => (
-                                <Col key={entryIndex}>
-                                    {field.key === 'status' || field.key === 'truckHere' ? (
-                                        <Form.Select
-                                        aria-label={field.label}
-                                        value={truckEntries[entryIndex][field.key] || ''}
-                                        onChange={(e) => handleChange(entryIndex, field.key, e.target.value)}
-                                    >
-                                        <option value="">Select...</option>
-                                        {field.key === 'status' && ['Active', 'Future', 'Pending', 'Sold'].map(option => (
-                                            <option key={option} value={option}>{option}</option>
-                                        ))}
-                                        {field.key === 'truckHere' && ['Yes', 'No'].map(option => (
-                                            <option key={option} value={option}>{option}</option>
-                                        ))}
-                                    </Form.Select>
-                                    
-                                    ) : (
-                                        <Form.Control 
-                                            type={field.key === 'purchaseDate' ? 'date' : 'text'}
-                                            value={truckEntries[entryIndex][field.key] || ''}
-                                            onChange={(e) => handleChange(entryIndex, field.key, e.target.value)} />
-                                    )}
-                                </Col>
-                            ))}
-                        </Row>
+  // Filter the fields based on relevance
+  const filteredFields = truckFormFields
+    .flat()
+    .filter((field) => relevantFields.includes(field.name));
+
+  return (
+    <Container>
+      <Form onSubmit={handleSubmit}>
+        <h3>Add Multiple Trucks</h3>
+        {filteredFields.map((field, index) => (
+          <Row key={index} className="mb-3 align-items-center">
+            <Col xs={3}>
+              <Form.Label>{field.label}</Form.Label>
+            </Col>
+            {Array.from({ length: 5 }).map((_, entryIndex) => (
+              <Col key={entryIndex}>
+                {field.type === "select" ? (
+                  <Form.Select
+                    value={truckEntries[entryIndex]?.[field.name] || ""}
+                    onChange={(e) =>
+                      handleChange(entryIndex, field.name, e.target.value)
+                    }
+                  >
+                    <option value="">Select...</option>
+                    {field.options.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
                     ))}
-                </Row>
-                <Button variant="primary" onClick={handleAddTruck} className="me-2">Add Another Truck</Button>
-                <Button type="submit">Submit All Trucks</Button>
-            </Form>
-        </Container>
-    );
+                  </Form.Select>
+                ) : (
+                  <Form.Control
+                    type={field.type}
+                    value={truckEntries[entryIndex]?.[field.name] || ""}
+                    onChange={(e) =>
+                      handleChange(entryIndex, field.name, e.target.value)
+                    }
+                  />
+                )}
+              </Col>
+            ))}
+          </Row>
+        ))}
+        <Row className="mt-3">
+          <Col>
+            <Button variant="primary" onClick={handleAddTruck} className="me-2">
+              Add Another Truck
+            </Button>
+            <Button type="submit">Submit All Trucks</Button>
+          </Col>
+        </Row>
+      </Form>
+    </Container>
+  );
 };
 
 export default AddMultipleTrucksForm;

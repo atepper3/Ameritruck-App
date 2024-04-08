@@ -1,0 +1,190 @@
+export const truckFormFields = [
+  [
+    {
+      name: "stockNumber",
+      label: "Stock Number",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "fleetNumber",
+      label: "Fleet Number",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "status",
+      label: "Status",
+      type: "select",
+      options: ["Active", "Future", "Pending", "Sold"],
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "saleType",
+      label: "Sale Type",
+      type: "select",
+      options: ["Retail", "NationsTruck", "Consignment", "Trade-In"],
+      className: "col-md-3 mb-3",
+    },
+  ],
+  [
+    {
+      name: "purchaseDate",
+      label: "Purchase Date",
+      type: "date",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "purchasedFrom",
+      label: "Purchased From",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "purchasePrice",
+      label: "Purchase Price",
+      type: "number",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "buyer",
+      label: "Buyer",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+  ],
+  [
+    {
+      name: "year",
+      label: "Year",
+      type: "number",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "make",
+      label: "Make",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "model",
+      label: "Model",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "vinSerial",
+      label: "VIN/Serial",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+  ],
+  [
+    {
+      name: "classification",
+      label: "Classification",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "location",
+      label: "Location",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "truckHere",
+      label: "Truck Here",
+      type: "select",
+      options: ["Yes", "No"],
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "titleIn",
+      label: "Title In",
+      type: "select",
+      options: ["Yes", "No"],
+      className: "col-md-3 mb-3",
+    },
+  ],
+  [
+    {
+      name: "titleNote",
+      label: "Title Note",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "closeType",
+      label: "Close Type",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "customer",
+      label: "Customer",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "saleDate",
+      label: "Sale Date",
+      type: "date",
+      className: "col-md-3 mb-3",
+    },
+  ],
+  [
+    {
+      name: "soldPrice",
+      label: "Sold Price",
+      type: "number",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "salesman",
+      label: "Salesman",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "fundedDate",
+      label: "Funded Date",
+      type: "date",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "fundingType",
+      label: "Funding Type",
+      type: "select",
+      options: ["Wire", "Cash", "Our Finance Company", "Outside Finance"],
+      className: "col-md-3 mb-3",
+    },
+  ],
+  [
+    {
+      name: "referralSource",
+      label: "Referral Source",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "titleOut",
+      label: "Title Out",
+      type: "select",
+      options: ["Yes", "No"],
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "titleOutNote",
+      label: "Title Out Note",
+      type: "text",
+      className: "col-md-3 mb-3",
+    },
+    {
+      name: "comments",
+      label: "Comments",
+      type: "textarea",
+      className: "col-md-3 mb-3",
+    },
+  ],
+];

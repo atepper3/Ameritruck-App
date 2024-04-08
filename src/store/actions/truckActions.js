@@ -26,6 +26,7 @@ import {
   ADD_COMMISSION,
   DELETE_COMMISSION,
   UPDATE_COMMISSION,
+  ADD_MULTIPLE_TRUCKS,
 } from "./actionTypes";
 
 export const fetchTruckDetails = (id) => async (dispatch) => {
@@ -55,6 +56,28 @@ export const addTruck = (truckData) => async (dispatch) => {
     });
   } catch (error) {
     console.error("Error adding truck: ", error);
+    // Handle error (e.g., showing an error message)
+  }
+};
+
+export const addMultipleTrucks = (truckEntries) => async (dispatch) => {
+  const addedTrucks = [];
+
+  try {
+    for (const truckData of truckEntries) {
+      const docRef = await addDoc(collection(db, "trucks"), {
+        truckinfo: { ...truckData },
+      });
+      console.log("Truck added with ID: ", docRef.id);
+      addedTrucks.push({ ...truckData, id: docRef.id });
+    }
+    dispatch({
+      type: ADD_MULTIPLE_TRUCKS,
+      payload: addedTrucks,
+    });
+    console.log("Trucks added successfully!");
+  } catch (error) {
+    console.error("Error adding trucks: ", error);
     // Handle error (e.g., showing an error message)
   }
 };

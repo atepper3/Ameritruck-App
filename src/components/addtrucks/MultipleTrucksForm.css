@@ -1,0 +1,11 @@
+/* MultipleTrucksForm.css */
+
+/* Apply this class to all form controls for consistent sizing */
+.form-control-date {
+  width: 100%; /* Ensures the control takes up the full width of its parent container */
+  height: calc(
+    1.5em + 0.75rem + 2px
+  ); /* Adjust the height to match other input fields */
+  padding: 0.375rem 0.75rem; /* Standard padding to match other form controls */
+  font-size: 1rem; /* Match the font size of other inputs */
+}
