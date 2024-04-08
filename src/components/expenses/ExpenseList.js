@@ -8,6 +8,7 @@ import {
   deleteExpense,
   setCurrentExpense,
   showExpenseModal,
+  fetchTruckDetails,
 } from "../../store/actions/truckActions";
 import ExpenseForm from "./ExpenseForm"; // Make sure to import ExpenseForm
 
@@ -21,6 +22,7 @@ const ExpenseList = () => {
 
   useEffect(() => {
     dispatch(fetchExpenses(truckId));
+    dispatch(fetchTruckDetails(truckId));
   }, [dispatch, truckId]);
 
   const handleEditExpense = (expense) => {

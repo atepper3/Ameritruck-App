@@ -1,23 +1,11 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-import truckReducer from './reducers/truckReducer';
-import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
-import { persistReducer, persistStore } from 'redux-persist';
-
-// Persist Config
-const persistConfig = {
-  key: 'root',
-  storage,
-};
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import truckReducer from "./reducers/truckReducer";
 
 const rootReducer = combineReducers({
   truck: truckReducer,
 });
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
-
-// Configure store with persisted reducer
+// Configure store directly with rootReducer
 export const store = configureStore({
-  reducer: persistedReducer,
+  reducer: rootReducer,
 });
-
-export const persistor = persistStore(store);

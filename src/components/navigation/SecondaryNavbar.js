@@ -1,11 +1,11 @@
 // SecondaryNavbar.js
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import './SecondaryNavbar.css';
+import React from "react";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import "./SecondaryNavbar.css";
 
 const SecondaryNavbar = () => {
-  const truckDetails = useSelector(state => state.truck.truckInfo);
+  const truckDetails = useSelector((state) => state.truck.truckInfo);
 
   if (!truckDetails) {
     return null; // Don't display if no truck is selected

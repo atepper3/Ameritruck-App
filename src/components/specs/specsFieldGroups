@@ -1,0 +1,250 @@
+export const specsFieldGroups = [
+  {
+    title: "Basic Specs",
+    fields: [
+      { name: "odometer", label: "Odometer", type: "text" },
+      { name: "ecm", label: "ECM", type: "text" },
+      { name: "hours", label: "Hours", type: "text" },
+      {
+        name: "engineMake",
+        label: "Engine Make",
+        type: "select",
+        options: [
+          "Caterpillar",
+          "Cummins",
+          "Detroit",
+          "Hino",
+          "International",
+          "Isuzu",
+          "Mack",
+          "Mercedes",
+          "Mitsubishi",
+          "Paccar",
+          "Volvo",
+        ],
+      },
+      { name: "engineModel", label: "Engine Model", type: "text" },
+      {
+        name: "engineSerialNumber",
+        label: "Engine Serial Number",
+        type: "text",
+      },
+      { name: "engineSize", label: "Engine Size", type: "text" },
+      { name: "hp", label: "HP", type: "text" },
+    ],
+  },
+  {
+    title: "APU",
+    fields: [
+      {
+        name: "apuMake",
+        label: "APU Make",
+        type: "select",
+        options: ["Carrier", "Cummins", "ThermoKing", "Idlefree", "Wabasto"],
+      },
+      {
+        name: "apuType",
+        label: "APU Type",
+        type: "select",
+        options: ["Diesel", "Battery"],
+      },
+    ],
+  },
+  {
+    title: "Transmission",
+    fields: [
+      {
+        name: "transMake",
+        label: "Trans Make",
+        type: "select",
+        options: [
+          "Allison",
+          "CAT",
+          "Detroit",
+          "Eaton",
+          "Eaton-Fuller",
+          "Hino",
+          "International",
+          "Mack",
+          "Mercedes",
+          "Packar",
+          "Volvo",
+        ],
+      },
+      { name: "transModel", label: "Trans Model", type: "text" },
+      {
+        name: "transType",
+        label: "Trans Type",
+        type: "select",
+        options: ["Auto", "Manual"],
+      },
+    ],
+  },
+  {
+    title: "Fuel and Exhaust",
+    fields: [
+      {
+        name: "fuelTanks",
+        label: "Fuel Tanks",
+        type: "select",
+        options: ["1", "2", "3", "4"],
+      },
+      {
+        name: "exhaust",
+        label: "Exhaust",
+        type: "select",
+        options: ["Horizontal", "Vertical", "Dual"],
+      },
+    ],
+  },
+  {
+    title: "Engine and Breathing",
+    fields: [
+      {
+        name: "breathers",
+        label: "Breathers",
+        type: "select",
+        options: ["Single", "Dual"],
+      },
+      { name: "rearRatio", label: "Rear Ratio", type: "text" },
+    ],
+  },
+  {
+    title: "Axle and Suspension",
+    fields: [
+      {
+        name: "axleType",
+        label: "Axle Type",
+        type: "select",
+        options: ["Single", "Tandem", "Tri", "Quad"],
+      },
+      {
+        name: "suspension",
+        label: "Suspension",
+        type: "select",
+        options: ["Air Ride", "Spring"],
+      },
+    ],
+  },
+  {
+    title: "Wheels and Brakes",
+    fields: [
+      { name: "wheelbase", label: "Wheelbase", type: "text" },
+      {
+        name: "brakeType",
+        label: "Brake Type",
+        type: "select",
+        options: ["Air", "Disc", "Hybrid"],
+      },
+    ],
+  },
+  {
+    title: "Tires",
+    fields: [
+      {
+        name: "tireTread",
+        label: "Tire Tread",
+        type: "select",
+        options: ["Recap", "Virgin"],
+      },
+      {
+        name: "tireType",
+        label: "Tire Type",
+        type: "select",
+        options: ["Dual", "Super Singles"],
+      },
+    ],
+  },
+  {
+    title: "Additional Features",
+    fields: [
+      {
+        name: "aluminums",
+        label: "Aluminums",
+        type: "select",
+        options: ["Yes", "No", "Front", "Rear"],
+      },
+      {
+        name: "fifthWheel",
+        label: "5th Wheel",
+        type: "select",
+        options: ["Air Slide", "Hydraulic", "Stationary", "Manual"],
+      },
+      {
+        name: "wetLineKit",
+        label: "Wet Line Kit",
+        type: "select",
+        options: ["Yes", "No"],
+      },
+    ],
+  },
+  {
+    title: "Cabin",
+    fields: [
+      { name: "sleeperSize", label: "Sleeper Size", type: "text" },
+      {
+        name: "bunkType",
+        label: "Bunk Type",
+        type: "select",
+        options: ["Daycab", "Single", "Double"],
+      },
+      {
+        name: "cabType",
+        label: "Cab Type",
+        type: "select",
+        options: ["Conventional", "Crew", "Extended", "Sleeper", "Daycab"],
+      },
+      {
+        name: "cabStyle",
+        label: "Cab Style",
+        type: "select",
+        options: [
+          "Box",
+          "Condo",
+          "Daycab",
+          "Double Bunk",
+          "Flat Top",
+          "High Rise",
+          "Mid Roof",
+          "Mid Roof XT",
+          "Raised Roof",
+          "Raised Roof Condo",
+          "Single Bunk",
+          "Sky-Rise",
+          "Spotter",
+          "Studio",
+        ],
+      },
+    ],
+  },
+  {
+    title: "Safety and Miscellaneous",
+    fields: [
+      { name: "color", label: "Color", type: "text" },
+      {
+        name: "fairings",
+        label: "Fairings",
+        type: "select",
+        options: ["Full", "Partial", "Cab", "Wheel"],
+      },
+      {
+        name: "laneDeparture",
+        label: "Lane Departure",
+        type: "select",
+        options: ["Yes", "No"],
+      },
+      {
+        name: "collisionMitigation",
+        label: "Collision Mitigation",
+        type: "select",
+        options: ["Yes", "No"],
+      },
+      {
+        name: "backupCamera",
+        label: "Backup Camera",
+        type: "select",
+        options: ["Yes", "No"],
+      },
+    ],
+  },
+];
