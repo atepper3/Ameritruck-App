@@ -9,7 +9,7 @@ import {
   setCurrentExpense,
   showExpenseModal,
   fetchTruckDetails,
-} from "../../store/actions/truckActions";
+} from "../../store/slices/truckSlice";
 import ExpenseForm from "./ExpenseForm"; // Make sure to import ExpenseForm
 
 const ExpenseList = () => {

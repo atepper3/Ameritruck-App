@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux"; // Import useDispatch
-import { addTruck } from "../../store/actions/truckActions"; // Import your action creator
+import { addTruck } from "../../store/slices/truckSlice"; // Import your action creator
 import { toast } from "react-toastify";
 import { truckFormFields } from "./truckFormFields";
 

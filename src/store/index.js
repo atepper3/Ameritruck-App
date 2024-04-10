@@ -1,11 +1,9 @@
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import truckReducer from "./reducers/truckReducer";
+import { configureStore } from "@reduxjs/toolkit";
+import truckSlice from "./slices/truckSlice";
 
-const rootReducer = combineReducers({
-  truck: truckReducer,
-});
-
-// Configure store directly with rootReducer
+// Configure store with the truck slice reducer
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: {
+    truck: truckSlice,
+  },
 });

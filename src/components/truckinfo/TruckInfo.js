@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchTruckDetails,
   updateTruckDetails,
-} from "../../store/actions/truckActions";
+} from "../../store/slices/truckSlice";
 import { Form, Button, Container, Card, Row, Col } from "react-bootstrap";
 import { fieldGroups } from "./FieldGroups";
 import "./TruckInfo.css";

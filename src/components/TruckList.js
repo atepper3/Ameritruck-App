@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchTruckList } from "../store/actions/truckActions";
+import { fetchTruckList } from "../store/slices/truckSlice";
 import { Card, CardHeader, CardBody, Row, Col } from "reactstrap";
 
 const TruckList = () => {

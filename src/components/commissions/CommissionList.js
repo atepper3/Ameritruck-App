@@ -5,7 +5,7 @@ import {
   fetchCommissions,
   deleteCommission,
   fetchTruckDetails,
-} from "../../store/actions/truckActions";
+} from "../../store/slices/truckSlice";
 import { Button, Table, Modal, Card } from "react-bootstrap";
 import CommissionForm from "./CommissionForm";
 
@@ -18,6 +18,7 @@ const CommissionList = () => {
 
   useEffect(() => {
     dispatch(fetchCommissions(truckId));
+    console.log("Fetching commissions for truckId:", truckId);
     dispatch(fetchTruckDetails(truckId));
   }, [dispatch, truckId]);
 

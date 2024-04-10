@@ -5,7 +5,7 @@ import {
   addExpense,
   updateExpense,
   hideExpenseModal,
-} from "../../store/actions/truckActions";
+} from "../../store/slices/truckSlice";
 
 // Initial form state for resetting
 const initialFormState = {

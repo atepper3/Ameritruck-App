@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { truckFormFields } from "./truckFormFields"; // Ensure correct import path
-import { addMultipleTrucks } from "../../store/actions/truckActions";
+import { addMultipleTrucks } from "../../store/slices/truckSlice";
 import { Button, Form, Container, Row, Col } from "react-bootstrap";
 
 const AddMultipleTrucksForm = () => {
