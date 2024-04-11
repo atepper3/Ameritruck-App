@@ -6,7 +6,7 @@ import {
   deleteCommission,
   fetchTruckDetails,
 } from "../../store/slices/truckSlice";
-import { Button, Table, Modal, Card } from "react-bootstrap";
+import { Button, Table, Card } from "react-bootstrap";
 import CommissionForm from "./CommissionForm";
 
 const CommissionList = () => {
@@ -33,7 +33,7 @@ const CommissionList = () => {
   };
 
   const handleDeleteCommission = (commissionId) => {
-    dispatch(deleteCommission(truckId, commissionId));
+    dispatch(deleteCommission({ truckId, commissionId }));
   };
 
   // Modify the commission submit handler if necessary
@@ -53,13 +53,14 @@ const CommissionList = () => {
       <Button variant="primary" onClick={handleAddCommission}>
         Add Commission
       </Button>
-      {/* CommissionForm modal invoked here with correct handleClose prop */}
+      {/* CommissionForm modal */}
       {showCommissionForm && (
         <CommissionForm
           show={showCommissionForm}
           handleClose={handleClose}
           commissionData={currentCommission}
           truckId={truckId}
+          onSubmit={handleCommissionSubmit} // Pass handleCommissionSubmit as a prop
         />
       )}
 

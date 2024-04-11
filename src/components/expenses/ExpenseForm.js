@@ -41,9 +41,15 @@ const ExpenseForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (currentExpense) {
-      dispatch(updateExpense(truckInfo.id, currentExpense.id, formState));
+      dispatch(
+        updateExpense({
+          truckId: truckInfo.id,
+          expenseId: currentExpense.id,
+          expenseData: formState,
+        })
+      );
     } else {
-      dispatch(addExpense(truckInfo.id, formState));
+      dispatch(addExpense({ truckId: truckInfo.id, expenseData: formState }));
     }
     closeModal();
   };

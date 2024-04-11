@@ -169,11 +169,14 @@ export const addCommission = createAsyncThunk(
   "truck/addCommission",
   async ({ truckId, commissionData }, { dispatch, rejectWithValue }) => {
     try {
-      await addDoc(
+      const docRef = await addDoc(
         collection(db, "trucks", truckId, "commissions"),
         commissionData
       );
+      console.log("Added commission:", commissionData);
+      console.log("To truckId:", truckId);
       dispatch(fetchCommissions(truckId)); // Optionally refresh commissions list
+      return { ...commissionData, id: docRef.id }; // Return the new commission with id
     } catch (error) {
       return rejectWithValue(error.toString());
     }
@@ -241,54 +244,81 @@ const truckSlice = createSlice({
     // Add other synchronous reducers as needed
   },
 
-extraReducers: (builder) => {
-  builder
-    .addCase(fetchTruckDetails.fulfilled, (state, action) => {
-      state.truckInfo = action.payload;
-    })
-    .addCase(addTruck.fulfilled, (state, action) => {
-      state.truckList.push(action.payload);
-    })
-    .addCase(fetchTruckList.fulfilled, (state, action) => {
-      state.truckList = action.payload;
-    })
-    .addCase(fetchExpenses.fulfilled, (state, action) => {
-      state.expenses = action.payload;
-    })
-    .addCase(fetchCommissions.fulfilled, (state, action) => {
-      state.commissions = action.payload;
-    })
-    // Handle add, update, and delete for commissions
-    .addCase(addCommission.fulfilled, (state, action) => {
-      state.commissions.push(action.payload);
-    })
-    .addCase(deleteCommission.fulfilled, (state, action) => {
-      state.commissions = state.commissions.filter(commission => commission.id !== action.meta.arg.commissionId);
-    })
-    .addCase(updateCommission.fulfilled, (state, action) => {
-      const index = state.commissions.findIndex(commission => commission.id === action.meta.arg.commissionId);
-      if (index !== -1) {
-        state.commissions[index] = { ...state.commissions[index], ...action.meta.arg.commissionData };
-      }
-    })
-    // Handle add, update, and delete for expenses
-    .addCase(addExpense.fulfilled, (state, action) => {
-      state.expenses.push(action.payload);
-    })
-    .addCase(deleteExpense.fulfilled, (state, action) => {
-      state.expenses = state.expenses.filter(expense => expense.id !== action.meta.arg.expenseId);
-    })
-    .addCase(updateExpense.fulfilled, (state, action) => {
-      const index = state.expenses.findIndex(expense => expense.id === action.meta.arg.expenseId);
-      if (index !== -1) {
-        state.expenses[index] = { ...state.expenses[index], ...action.meta.arg.expenseData };
-      }
-    }
-  );
-},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchTruckDetails.fulfilled, (state, action) => {
+        state.truckInfo = action.payload;
+      })
+      .addCase(addTruck.fulfilled, (state, action) => {
+        state.truckList.push(action.payload);
+      })
+      .addCase(fetchTruckList.fulfilled, (state, action) => {
+        state.truckList = action.payload;
+      })
+      .addCase(fetchExpenses.fulfilled, (state, action) => {
+        state.expenses = action.payload;
+      })
+      .addCase(fetchCommissions.fulfilled, (state, action) => {
+        state.commissions = action.payload;
+      })
+      // Handle add, update, and delete for commissions
+      .addCase(addCommission.fulfilled, (state, action) => {
+        state.commissions.push(action.payload);
+      })
+      .addCase(deleteCommission.fulfilled, (state, action) => {
+        state.commissions = state.commissions.filter(
+          (commission) => commission.id !== action.meta.arg.commissionId
+        );
+      })
+      .addCase(updateCommission.fulfilled, (state, action) => {
+        const index = state.commissions.findIndex(
+          (commission) => commission.id === action.meta.arg.commissionId
+        );
+        if (index !== -1) {
+          state.commissions[index] = {
+            ...state.commissions[index],
+            ...action.meta.arg.commissionData,
+          };
+        }
+      })
+      // Handle add, update, and delete for expenses
+      .addCase(addExpense.fulfilled, (state, action) => {
+        state.expenses.push(action.payload);
+      })
+      .addCase(deleteExpense.fulfilled, (state, action) => {
+        state.expenses = state.expenses.filter(
+          (expense) => expense.id !== action.meta.arg.expenseId
+        );
+      })
+      .addCase(updateExpense.fulfilled, (state, action) => {
+        const index = state.expenses.findIndex(
+          (expense) => expense.id === action.meta.arg.expenseId
+        );
+        if (index !== -1) {
+          state.expenses[index] = {
+            ...state.expenses[index],
+            ...action.meta.arg.expenseData,
+          };
+        }
+      });
+  },
+});
 
-
-export const { showExpenseModal, hideExpenseModal, setCurrentExpense } =
-  truckSlice.actions;
+export const {
+  showExpenseModal,
+  hideExpenseModal,
+  setCurrentExpense,
+  fetchTruckDetailsFulfilled,
+  addTruckFulfilled,
+  fetchTruckListFulfilled,
+  fetchExpensesFulfilled,
+  fetchCommissionsFulfilled,
+  addCommissionFulfilled,
+  deleteCommissionFulfilled,
+  updateCommissionFulfilled,
+  addExpenseFulfilled,
+  deleteExpenseFulfilled,
+  updateExpenseFulfilled,
+} = truckSlice.actions;
 
 export default truckSlice.reducer;

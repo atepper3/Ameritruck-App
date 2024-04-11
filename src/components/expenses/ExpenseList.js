@@ -31,7 +31,7 @@ const ExpenseList = () => {
   };
 
   const handleDeleteExpense = (expenseId) => {
-    dispatch(deleteExpense(truckId, expenseId));
+    dispatch(deleteExpense({ truckId: truckId, expenseId: expenseId }));
   };
 
   const handleAddExpense = () => {
@@ -39,10 +39,11 @@ const ExpenseList = () => {
     dispatch(showExpenseModal());
   };
 
-  const totalExpenses = expenses.reduce(
-    (acc, expense) => acc + parseFloat(expense.cost || 0),
-    0
-  );
+  const totalExpenses = expenses.reduce((acc, expense) => {
+    // Ensure expense and expense.cost are defined
+    const expenseCost = expense?.cost ? parseFloat(expense.cost) : 0;
+    return acc + expenseCost;
+  }, 0);
 
   return (
     <>
@@ -76,32 +77,34 @@ const ExpenseList = () => {
                 </tr>
               </thead>
               <tbody>
-                {expenses.map((expense) => (
-                  <tr key={expense.id}>
-                    <td>{expense.category}</td>
-                    <td>{expense.descriptionOfWork}</td>
-                    <td>{expense.vendor}</td>
-                    <td>${expense.cost}</td>
-                    <td>{expense.dateEntered}</td>
-                    <td>{expense.paidOnDate}</td>
-                    <td>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => handleEditExpense(expense)}
-                      >
-                        Edit
-                      </Button>{" "}
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDeleteExpense(expense.id)}
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                {expenses.map((expense) =>
+                  expense ? (
+                    <tr key={expense.id}>
+                      <td>{expense.category}</td>
+                      <td>{expense.descriptionOfWork}</td>
+                      <td>{expense.vendor}</td>
+                      <td>${expense.cost}</td>
+                      <td>{expense.dateEntered}</td>
+                      <td>{expense.paidOnDate}</td>
+                      <td>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleEditExpense(expense)}
+                        >
+                          Edit
+                        </Button>{" "}
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteExpense(expense.id)}
+                        >
+                          Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  ) : null
+                )}
               </tbody>
             </Table>
           </div>

@@ -9,7 +9,13 @@ const initialFormState = {
   amount: "",
 };
 
-const CommissionForm = ({ show, handleClose, commissionData, truckId }) => {
+const CommissionForm = ({
+  show,
+  handleClose,
+  commissionData,
+  truckId,
+  onSubmit,
+}) => {
   const [commission, setCommission] = useState(initialFormState);
   const [isPercentageType, setIsPercentageType] = useState(false);
   const dispatch = useDispatch();
@@ -29,11 +35,20 @@ const CommissionForm = ({ show, handleClose, commissionData, truckId }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Submitting commission:", commission);
     if (commissionData?.id) {
-      dispatch(updateCommission(truckId, commissionData.id, commission));
+      dispatch(
+        updateCommission({
+          truckId,
+          commissionId: commissionData.id,
+          commissionData: commission,
+        })
+      );
     } else {
-      dispatch(addCommission(truckId, commission));
+      dispatch(addCommission({ truckId, commissionData: commission }));
     }
+    onSubmit(commission); // Call onSubmit prop
+    console.log("Commission submitted:", commission);
     handleClose();
     setCommission(initialFormState); // Reset form upon submission
     setIsPercentageType(false); // Reset percentage type state
