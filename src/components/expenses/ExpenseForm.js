@@ -4,8 +4,9 @@ import { Modal, Form, Button } from "react-bootstrap";
 import {
   addExpense,
   updateExpense,
+  showExpenseModal,
   hideExpenseModal,
-} from "../../store/slices/truckSlice";
+} from "../../store/slices/expenseSlice";
 
 // Initial form state for resetting
 const initialFormState = {

@@ -4,10 +4,11 @@ import { useParams } from "react-router-dom";
 import {
   fetchCommissions,
   deleteCommission,
-  fetchTruckDetails,
-} from "../../store/slices/truckSlice";
+} from "../../store/slices/commissionSlice";
+import { fetchTruckDetails } from "../../store/slices/truckSlice";
 import { Button, Table, Card } from "react-bootstrap";
 import CommissionForm from "./CommissionForm";
+import CommissionCalculator from "./CommissionCalculator";
 
 const CommissionList = () => {
   const { id: truckId } = useParams(); // Use useParams to get the truckId

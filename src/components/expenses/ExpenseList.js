@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Card } from "react-bootstrap";
 import { Button, Table } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,21 +8,20 @@ import {
   deleteExpense,
   setCurrentExpense,
   showExpenseModal,
-  fetchTruckDetails,
-} from "../../store/slices/truckSlice";
+} from "../../store/slices/expenseSlice";
 import ExpenseForm from "./ExpenseForm"; // Make sure to import ExpenseForm
 
 const ExpenseList = () => {
   const { id: truckId } = useParams();
   const dispatch = useDispatch();
-  const expenses = useSelector((state) => state.truck.expenses);
+  // Correcting the useSelector to match the expenseSlice state structure
+  const expense = useSelector((state) => state.expense.items);
   const isExpenseModalOpen = useSelector(
-    (state) => state.truck.isExpenseModalOpen
-  ); // Assuming you have this in your state
+    (state) => state.expense.isExpenseModalOpen
+  );
 
   useEffect(() => {
     dispatch(fetchExpenses(truckId));
-    dispatch(fetchTruckDetails(truckId));
   }, [dispatch, truckId]);
 
   const handleEditExpense = (expense) => {
@@ -31,19 +30,21 @@ const ExpenseList = () => {
   };
 
   const handleDeleteExpense = (expenseId) => {
-    dispatch(deleteExpense({ truckId: truckId, expenseId: expenseId }));
+    dispatch(deleteExpense({ truckId, expenseId }));
   };
 
   const handleAddExpense = () => {
-    dispatch(setCurrentExpense(null)); // Clear current expense to signify adding a new one
+    dispatch(setCurrentExpense(null)); // Prepare for adding a new expense
     dispatch(showExpenseModal());
   };
 
-  const totalExpenses = expenses.reduce((acc, expense) => {
-    // Ensure expense and expense.cost are defined
-    const expenseCost = expense?.cost ? parseFloat(expense.cost) : 0;
-    return acc + expenseCost;
-  }, 0);
+  // Calculate total expenses dynamically based on fetched expenses
+  const totalExpenses = expense.reduce(
+    (acc, expense) => acc + Number(expense.cost || 0),
+    0
+  );
+
+  if (!expense) return <div>Loading...</div>;
 
   return (
     <>
@@ -77,7 +78,7 @@ const ExpenseList = () => {
                 </tr>
               </thead>
               <tbody>
-                {expenses.map((expense) =>
+                {expense.map((expense) =>
                   expense ? (
                     <tr key={expense.id}>
                       <td>{expense.category}</td>

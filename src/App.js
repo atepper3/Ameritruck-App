@@ -13,7 +13,7 @@ import ContactsManager from "./components/contacts/ContactsManager";
 import ExpenseList from "./components/expenses/ExpenseList";
 import CommissionList from "./components/commissions/CommissionList";
 import { Provider } from "react-redux";
-import { store } from "./store"; // Make sure this path is correct
+import store from "./store"; // Make sure this path is correct
 import Navigation from "./components/navigation/Navigation";
 import SecondaryNavbar from "./components/navigation/SecondaryNavbar";
 

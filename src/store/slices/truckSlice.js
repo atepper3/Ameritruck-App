@@ -12,7 +12,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 
-// Async Thunks
+// Truck Async Thunks
 export const fetchTruckDetails = createAsyncThunk(
   "truck/fetchTruckDetails",
   async (truckId, { rejectWithValue }) => {
@@ -91,159 +91,16 @@ export const fetchTruckList = createAsyncThunk(
   }
 );
 
-export const fetchExpenses = createAsyncThunk(
-  "truck/fetchExpenses",
-  async (truckId, { rejectWithValue }) => {
-    try {
-      const expensesRef = collection(db, "trucks", truckId, "expenses");
-      const querySnapshot = await getDocs(expensesRef);
-      const expenses = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      return expenses;
-    } catch (error) {
-      return rejectWithValue(error.toString());
-    }
-  }
-);
-
-export const addExpense = createAsyncThunk(
-  "truck/addExpense",
-  async ({ truckId, expenseData }, { dispatch, rejectWithValue }) => {
-    try {
-      await addDoc(collection(db, "trucks", truckId, "expenses"), expenseData);
-      dispatch(fetchExpenses(truckId)); // Optionally refresh expenses list
-    } catch (error) {
-      return rejectWithValue(error.toString());
-    }
-  }
-);
-
-export const deleteExpense = createAsyncThunk(
-  "truck/deleteExpense",
-  async ({ truckId, expenseId }, { dispatch, rejectWithValue }) => {
-    try {
-      await deleteDoc(doc(db, "trucks", truckId, "expenses", expenseId));
-      dispatch(fetchExpenses(truckId)); // Optionally refresh expenses list
-    } catch (error) {
-      return rejectWithValue(error.toString());
-    }
-  }
-);
-
-export const updateExpense = createAsyncThunk(
-  "truck/updateExpense",
-  async (
-    { truckId, expenseId, expenseData },
-    { dispatch, rejectWithValue }
-  ) => {
-    try {
-      const expenseRef = doc(db, "trucks", truckId, "expenses", expenseId);
-      await updateDoc(expenseRef, expenseData);
-      dispatch(fetchExpenses(truckId)); // Optionally refresh expenses list
-    } catch (error) {
-      return rejectWithValue(error.toString());
-    }
-  }
-);
-
-export const fetchCommissions = createAsyncThunk(
-  "truck/fetchCommissions",
-  async (truckId, { rejectWithValue }) => {
-    try {
-      const commissionsRef = collection(db, "trucks", truckId, "commissions");
-      const querySnapshot = await getDocs(commissionsRef);
-      const commissions = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      return commissions;
-    } catch (error) {
-      return rejectWithValue(error.toString());
-    }
-  }
-);
-
-export const addCommission = createAsyncThunk(
-  "truck/addCommission",
-  async ({ truckId, commissionData }, { dispatch, rejectWithValue }) => {
-    try {
-      const docRef = await addDoc(
-        collection(db, "trucks", truckId, "commissions"),
-        commissionData
-      );
-      console.log("Added commission:", commissionData);
-      console.log("To truckId:", truckId);
-      dispatch(fetchCommissions(truckId)); // Optionally refresh commissions list
-      return { ...commissionData, id: docRef.id }; // Return the new commission with id
-    } catch (error) {
-      return rejectWithValue(error.toString());
-    }
-  }
-);
-
-export const deleteCommission = createAsyncThunk(
-  "truck/deleteCommission",
-  async ({ truckId, commissionId }, { dispatch, rejectWithValue }) => {
-    try {
-      await deleteDoc(doc(db, "trucks", truckId, "commissions", commissionId));
-      dispatch(fetchCommissions(truckId)); // Optionally refresh commissions list
-    } catch (error) {
-      return rejectWithValue(error.toString());
-    }
-  }
-);
-
-export const updateCommission = createAsyncThunk(
-  "truck/updateCommission",
-  async (
-    { truckId, commissionId, commissionData },
-    { dispatch, rejectWithValue }
-  ) => {
-    try {
-      const commissionRef = doc(
-        db,
-        "trucks",
-        truckId,
-        "commissions",
-        commissionId
-      );
-      await updateDoc(commissionRef, commissionData);
-      dispatch(fetchCommissions(truckId)); // Optionally refresh commissions list
-    } catch (error) {
-      return rejectWithValue(error.toString());
-    }
-  }
-);
-
 // Truck Slice
-const initialState = {
+const truckInitialState = {
   truckInfo: null,
   truckList: [],
-  expenses: [],
-  commissions: [],
-  isExpenseModalOpen: false,
-  currentExpense: null,
 };
 
 const truckSlice = createSlice({
   name: "truck",
-  initialState,
-  reducers: {
-    // Place for potential reducers for synchronously modifying state
-    showExpenseModal(state) {
-      state.isExpenseModalOpen = true;
-    },
-    hideExpenseModal(state) {
-      state.isExpenseModalOpen = false;
-    },
-    setCurrentExpense(state, action) {
-      state.currentExpense = action.payload;
-    },
-    // Add other synchronous reducers as needed
-  },
-
+  initialState: truckInitialState,
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchTruckDetails.fulfilled, (state, action) => {
@@ -255,70 +112,13 @@ const truckSlice = createSlice({
       .addCase(fetchTruckList.fulfilled, (state, action) => {
         state.truckList = action.payload;
       })
-      .addCase(fetchExpenses.fulfilled, (state, action) => {
-        state.expenses = action.payload;
+      .addCase(addMultipleTrucks.fulfilled, (state, action) => {
+        state.truckList.push(...action.payload);
       })
-      .addCase(fetchCommissions.fulfilled, (state, action) => {
-        state.commissions = action.payload;
-      })
-      // Handle add, update, and delete for commissions
-      .addCase(addCommission.fulfilled, (state, action) => {
-        state.commissions.push(action.payload);
-      })
-      .addCase(deleteCommission.fulfilled, (state, action) => {
-        state.commissions = state.commissions.filter(
-          (commission) => commission.id !== action.meta.arg.commissionId
-        );
-      })
-      .addCase(updateCommission.fulfilled, (state, action) => {
-        const index = state.commissions.findIndex(
-          (commission) => commission.id === action.meta.arg.commissionId
-        );
-        if (index !== -1) {
-          state.commissions[index] = {
-            ...state.commissions[index],
-            ...action.meta.arg.commissionData,
-          };
-        }
-      })
-      // Handle add, update, and delete for expenses
-      .addCase(addExpense.fulfilled, (state, action) => {
-        state.expenses.push(action.payload);
-      })
-      .addCase(deleteExpense.fulfilled, (state, action) => {
-        state.expenses = state.expenses.filter(
-          (expense) => expense.id !== action.meta.arg.expenseId
-        );
-      })
-      .addCase(updateExpense.fulfilled, (state, action) => {
-        const index = state.expenses.findIndex(
-          (expense) => expense.id === action.meta.arg.expenseId
-        );
-        if (index !== -1) {
-          state.expenses[index] = {
-            ...state.expenses[index],
-            ...action.meta.arg.expenseData,
-          };
-        }
+      .addCase(updateTruckDetails.fulfilled, (state, action) => {
+        state.truckInfo = action.payload;
       });
   },
 });
-
-export const {
-  showExpenseModal,
-  hideExpenseModal,
-  setCurrentExpense,
-  fetchTruckDetailsFulfilled,
-  addTruckFulfilled,
-  fetchTruckListFulfilled,
-  fetchExpensesFulfilled,
-  fetchCommissionsFulfilled,
-  addCommissionFulfilled,
-  deleteCommissionFulfilled,
-  updateCommissionFulfilled,
-  addExpenseFulfilled,
-  deleteExpenseFulfilled,
-  updateExpenseFulfilled,
-} = truckSlice.actions;
 
 export default truckSlice.reducer;

@@ -1,9 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
-import truckSlice from "./slices/truckSlice";
+import truckReducer from "./slices/truckSlice"; // Update the path as necessary
+import commissionReducer from "./slices/commissionSlice"; // Update the path as necessary
+import expenseReducer from "./slices/expenseSlice"; // Update the path as necessary
 
-// Configure store with the truck slice reducer
-export const store = configureStore({
+const store = configureStore({
   reducer: {
-    truck: truckSlice,
+    truck: truckReducer,
+    commission: commissionReducer,
+    expense: expenseReducer,
   },
 });
+
+export default store;
