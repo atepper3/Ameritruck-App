@@ -40,19 +40,6 @@ const CommissionList = () => {
     dispatch(fetchExpenses(truckId));
   }, [dispatch, truckId]);
 
-  useEffect(() => {
-    if (truckInfo && totalExpenses != null) {
-      const { purchasePrice, soldPrice } = truckInfo;
-      dispatch(
-        calculateCommissions({
-          totalExpenses,
-          purchasePrice,
-          soldPrice,
-        })
-      );
-    }
-  }, [dispatch, truckInfo, totalExpenses]);
-
   const handleAddCommission = () => {
     dispatch(setCurrentCommission(null));
     dispatch(showCommissionModal());

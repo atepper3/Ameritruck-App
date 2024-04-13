@@ -71,7 +71,7 @@ export const updateExpense = createAsyncThunk(
 );
 
 // Helper function to calculate totals
-const calculateTotalsAndGrossProfit = (expenses, purchasePrice, soldPrice) => {
+const calculateTotals = (expenses) => {
   const totals = expenses.reduce((acc, expense) => {
     const category = expense.category;
     const cost = Number(expense.cost) || 0;
@@ -85,8 +85,7 @@ const calculateTotalsAndGrossProfit = (expenses, purchasePrice, soldPrice) => {
     (sum, amount) => sum + amount,
     0
   );
-  const grossProfit = soldPrice - purchasePrice - totalExpenses;
-  return { totals, totalExpenses, grossProfit };
+  return { totals, totalExpenses };
 };
 
 const expenseSlice = createSlice({
@@ -96,7 +95,6 @@ const expenseSlice = createSlice({
     loading: false,
     totalsByCategory: {},
     totalExpenses: 0,
-    grossProfit: 0,
     currentExpense: null,
     isExpenseModalOpen: false,
   },
@@ -118,15 +116,9 @@ const expenseSlice = createSlice({
       })
       .addCase(fetchExpenses.fulfilled, (state, action) => {
         state.items = action.payload;
-        const { totals, totalExpenses, grossProfit } =
-          calculateTotalsAndGrossProfit(
-            action.payload,
-            state.purchasePrice,
-            state.soldPrice
-          );
+        const { totals, totalExpenses } = calculateTotals(action.payload);
         state.totalsByCategory = totals;
         state.totalExpenses = totalExpenses;
-        state.grossProfit = grossProfit;
         state.loading = false;
       })
       .addCase(fetchExpenses.rejected, (state, action) => {
@@ -134,34 +126,23 @@ const expenseSlice = createSlice({
         console.error("Error fetching expenses:", action.error.message);
       })
       .addCase(addExpense.fulfilled, (state, action) => {
-        state.items.push(action.payload);
+        state.items.push(action.payload); // Corrected from state.expenses to state.items
       })
       .addCase(deleteExpense.fulfilled, (state, action) => {
         state.items = state.items.filter(
           (expense) => expense.id !== action.meta.arg.expenseId
-        );
+        ); // Corrected from state.expenses to state.items
       })
       .addCase(updateExpense.fulfilled, (state, action) => {
         const index = state.items.findIndex(
           (expense) => expense.id === action.meta.arg.expenseId
-        );
+        ); // Corrected from state.expenses to state.items
         if (index !== -1) {
           state.items[index] = {
             ...state.items[index],
             ...action.meta.arg.expenseData,
           };
         }
-      })
-      // Additional actions to handle purchase price and sold price updates
-      .addCase(setPurchasePrice, (state, action) => {
-        state.purchasePrice = action.payload;
-        state.grossProfit =
-          state.soldPrice - action.payload - state.totalExpenses;
-      })
-      .addCase(setSoldPrice, (state, action) => {
-        state.soldPrice = action.payload;
-        state.grossProfit =
-          action.payload - state.purchasePrice - state.totalExpenses;
       });
   },
 });

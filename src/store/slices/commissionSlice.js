@@ -106,13 +106,9 @@ const commissionSlice = createSlice({
       state.currentCommission = action.payload;
     },
     calculateCommissions(state, action) {
-      const { totalExpenses, purchasePrice, soldPrice } = action.payload;
-      const grossProfit = soldPrice - purchasePrice - totalExpenses;
+      const { grossProfit } = action.payload;
 
       console.log("Received Values:", {
-        totalExpenses,
-        purchasePrice,
-        soldPrice,
         grossProfit,
       });
 
@@ -165,26 +161,17 @@ const commissionSlice = createSlice({
     builder
       .addCase(fetchCommissions.fulfilled, (state, action) => {
         state.commissions = action.payload;
-        // Trigger recalculations after fetching commissions
-        commissionSlice.caseReducers.calculateCommissions(state, {
-          payload: { ...state.truckInfo },
-        });
+        // Do not trigger calculateCommissions here
       })
       .addCase(addCommission.fulfilled, (state, action) => {
         state.commissions.push(action.payload);
-        // Trigger recalculations after adding a commission
-        commissionSlice.caseReducers.calculateCommissions(state, {
-          payload: { ...state.truckInfo },
-        });
+        // Do not trigger calculateCommissions here
       })
       .addCase(deleteCommission.fulfilled, (state, action) => {
         state.commissions = state.commissions.filter(
           (commission) => commission.id !== action.meta.arg.commissionId
         );
-        // Trigger recalculations after deleting a commission
-        commissionSlice.caseReducers.calculateCommissions(state, {
-          payload: { ...state.truckInfo },
-        });
+        // Do not trigger calculateCommissions here
       })
       .addCase(updateCommission.fulfilled, (state, action) => {
         const index = state.commissions.findIndex(
@@ -196,10 +183,7 @@ const commissionSlice = createSlice({
             ...action.meta.arg.commissionData,
           };
         }
-        // Trigger recalculations after updating a commission
-        commissionSlice.caseReducers.calculateCommissions(state, {
-          payload: { ...state.truckInfo },
-        });
+        // Do not trigger calculateCommissions here
       });
   },
 });
