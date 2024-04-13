@@ -7,8 +7,9 @@ import {
 } from "../../store/slices/commissionSlice";
 
 const initialFormState = {
-  type: "",
   name: "",
+  category: "", // New field for categorizing commissions
+  type: "",
   amount: "",
 };
 
@@ -30,7 +31,8 @@ const CommissionForm = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setCommission((prev) => ({ ...prev, [name]: value }));
+    const parsedValue = name === "amount" ? parseFloat(value) : value;
+    setCommission((prev) => ({ ...prev, [name]: parsedValue }));
     if (name === "type") {
       setIsPercentageType(value.includes("%"));
     }
@@ -38,21 +40,19 @@ const CommissionForm = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Submitting commission:", commission);
-    if (commissionData?.id) {
-      dispatch(
-        updateCommission({
-          truckId,
-          commissionId: commissionData.id,
-          commissionData: commission,
-        })
-      );
-    } else {
-      dispatch(addCommission({ truckId, commissionData: commission }));
-    }
-    onSubmit(commission); // Call onSubmit prop
-    console.log("Commission submitted:", commission);
-    handleClose();
+
+    // Create submission data with amount set to null if it's a percentage type
+    const submissionData = {
+      ...commission,
+      amount: isPercentageType ? null : commission.amount,
+    };
+
+    console.log("Submitting commission:", submissionData);
+
+    // Pass the adjusted commission data to the parent's onSubmit function
+    onSubmit(submissionData); // This should now correctly handle the data with amount as null for percentage types
+
+    handleClose(); // Close the modal
     setCommission(initialFormState); // Reset form upon submission
     setIsPercentageType(false); // Reset percentage type state
   };
@@ -75,21 +75,6 @@ const CommissionForm = ({
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3">
-            <Form.Label>Type</Form.Label>
-            <Form.Select
-              name="type"
-              value={commission.type}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Type</option>
-              <option value="Buyer Flat Rate">Buyer Flat Rate</option>
-              <option value="Buyer %">Buyer %</option>
-              <option value="Seller Flat Rate">Seller Flat Rate</option>
-              <option value="Seller %">Seller %</option>
-            </Form.Select>
-          </Form.Group>
-          <Form.Group className="mb-3">
             <Form.Label>Name</Form.Label>
             <Form.Control
               type="text"
@@ -100,13 +85,41 @@ const CommissionForm = ({
             />
           </Form.Group>
           <Form.Group className="mb-3">
+            <Form.Label>Category</Form.Label>
+            <Form.Select
+              name="category"
+              value={commission.category}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select Category</option>
+              <option value="Buyer">Buyer</option>
+              <option value="Seller">Seller</option>
+            </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Type</Form.Label>
+            <Form.Select
+              name="type"
+              value={commission.type}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select Type</option>
+              <option value="Flat">Flat</option>
+              <option value="10%">10%</option>
+              <option value="15%">15%</option>
+            </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-3">
             <Form.Label>Amount</Form.Label>
             <Form.Control
               type="number"
               name="amount"
               value={commission.amount}
               onChange={handleChange}
-              required
+              required={!isPercentageType} // Only required if not percentage
+              disabled={isPercentageType} // Disable if it's a percentage type
             />
           </Form.Group>
           <div className="text-end">

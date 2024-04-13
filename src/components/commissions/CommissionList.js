@@ -14,6 +14,7 @@ import {
 import { fetchTruckDetails } from "../../store/slices/truckSlice";
 import { Button, Table, Card } from "react-bootstrap";
 import CommissionForm from "./CommissionForm"; // Ensure this is the correct path
+import { fetchExpenses } from "../../store/slices/expenseSlice";
 
 const CommissionList = () => {
   const { id: truckId } = useParams();
@@ -36,16 +37,17 @@ const CommissionList = () => {
   useEffect(() => {
     dispatch(fetchCommissions(truckId));
     dispatch(fetchTruckDetails(truckId));
+    dispatch(fetchExpenses(truckId));
   }, [dispatch, truckId]);
 
   useEffect(() => {
     if (truckInfo && totalExpenses != null) {
-      const { purchasePrice, salePrice } = truckInfo;
+      const { purchasePrice, soldPrice } = truckInfo;
       dispatch(
         calculateCommissions({
           totalExpenses,
           purchasePrice,
-          salePrice,
+          soldPrice,
         })
       );
     }
@@ -66,13 +68,20 @@ const CommissionList = () => {
   };
 
   const handleCommissionSubmit = (commissionData) => {
-    if (!currentCommission) {
-      dispatch(addCommission({ truckId, commissionData }));
-    } else {
+    if (commissionData.id) {
+      // Update existing commission
       dispatch(
         updateCommission({
           truckId,
-          commissionId: currentCommission.id,
+          commissionId: commissionData.id,
+          commissionData,
+        })
+      );
+    } else {
+      // Add new commission
+      dispatch(
+        addCommission({
+          truckId,
           commissionData,
         })
       );
@@ -83,11 +92,6 @@ const CommissionList = () => {
   const handleClose = () => {
     dispatch(hideCommissionModal());
   };
-
-  const commissionCategories = [
-    { title: "Buyer Commissions", role: "Buyer" },
-    { title: "Seller Commissions", role: "Seller" },
-  ];
 
   return (
     <div>
@@ -104,50 +108,99 @@ const CommissionList = () => {
         />
       )}
 
-      {commissionCategories.map(({ title, role }) => (
-        <Card key={title} className="shadow mb-4">
-          <Card.Header className="bg-transparent">{title}</Card.Header>
-          <Card.Body>
-            <Table hover variant="dark">
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Name</th>
-                  <th>Amount</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {commissions
-                  .filter((c) => c.role === role)
-                  .map((commission) => (
-                    <tr key={commission.id}>
-                      <td>{commission.type}</td>
-                      <td>{commission.name}</td>
-                      <td>${commission.amount.toFixed(2)}</td>
-                      <td>
-                        <Button
-                          variant="secondary"
-                          onClick={() => handleEditCommission(commission)}
-                        >
-                          Edit
-                        </Button>{" "}
-                        <Button
-                          variant="danger"
-                          onClick={() => handleDeleteCommission(commission.id)}
-                        >
-                          Delete
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </Table>
-          </Card.Body>
-        </Card>
-      ))}
+      {/* Buyer's Commissions Table */}
+      <Card className="shadow mb-4">
+        <Card.Header className="bg-transparent">Buyer Commissions</Card.Header>
+        <Card.Body>
+          <Table hover variant="dark">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {commissions
+                .filter((c) => c.category === "Buyer")
+                .map((commission) => (
+                  <tr key={commission.id}>
+                    <td>{commission.name}</td>
+                    <td>{commission.type}</td>
+                    <td>
+                      {typeof commission.amount === "number"
+                        ? `$${commission.amount.toFixed(2)}`
+                        : "N/A"}
+                    </td>
+                    <td>
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleEditCommission(commission)}
+                      >
+                        Edit
+                      </Button>{" "}
+                      <Button
+                        variant="danger"
+                        onClick={() => handleDeleteCommission(commission.id)}
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
 
-      {/* Totals and Net Profit Card */}
+      {/* Seller's Commissions Table */}
+      <Card className="shadow mb-4">
+        <Card.Header className="bg-transparent">Seller Commissions</Card.Header>
+        <Card.Body>
+          <Table hover variant="dark">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {commissions
+                .filter((c) => c.category === "Seller")
+                .map((commission) => (
+                  <tr key={commission.id}>
+                    <td>{commission.name}</td>
+                    <td>{commission.type}</td>
+                    <td>
+                      {typeof commission.amount === "number"
+                        ? `$${commission.amount.toFixed(2)}`
+                        : "N/A"}
+                    </td>
+                    <td>
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleEditCommission(commission)}
+                      >
+                        Edit
+                      </Button>{" "}
+                      <Button
+                        variant="danger"
+                        onClick={() => handleDeleteCommission(commission.id)}
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
+
+      {/* Summary Table */}
       <Card className="shadow mb-4">
         <Card.Header className="bg-transparent">Summary</Card.Header>
         <Card.Body>

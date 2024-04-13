@@ -106,44 +106,47 @@ const commissionSlice = createSlice({
       state.currentCommission = action.payload;
     },
     calculateCommissions(state, action) {
-      const { totalExpenses, purchasePrice, salePrice } = action.payload;
-      const grossProfit = salePrice - purchasePrice - totalExpenses;
+      const { totalExpenses, purchasePrice, soldPrice } = action.payload;
+      const grossProfit = soldPrice - purchasePrice - totalExpenses;
 
-      // Calculating total flat commissions
-      const totalFlatCommissions = state.commissions
-        .filter((com) => com.type === "Flat")
-        .reduce((sum, com) => sum + com.amount, 0);
+      console.log("Received Values:", {
+        totalExpenses,
+        purchasePrice,
+        soldPrice,
+        grossProfit,
+      });
 
-      // Adjusted gross profit used for percentage commissions
-      const adjustedGrossProfit = grossProfit - totalFlatCommissions;
-
-      // Calculating percentage commissions based on adjusted gross profit
-      const totalPercentageBuyerCommissions = state.commissions
-        .filter((com) => com.role === "Buyer" && com.type === "%")
-        .reduce(
-          (sum, com) => sum + adjustedGrossProfit * (com.amount / 100),
-          0
-        );
-      const totalPercentageSellerCommissions = state.commissions
-        .filter((com) => com.role === "Seller" && com.type === "%")
-        .reduce(
-          (sum, com) => sum + adjustedGrossProfit * (com.amount / 100),
-          0
-        );
-
-      // Calculating total flat commissions separately for buyers and sellers
+      // Calculate total flat buyer and seller commissions
       const totalFlatBuyerCommissions = state.commissions
-        .filter((com) => com.role === "Buyer" && com.type === "Flat")
-        .reduce((sum, com) => sum + com.amount, 0);
-      const totalFlatSellerCommissions = state.commissions
-        .filter((com) => com.role === "Seller" && com.type === "Flat")
+        .filter((com) => com.category === "Buyer" && com.type === "Flat")
         .reduce((sum, com) => sum + com.amount, 0);
 
-      // Total buyer and seller commissions
-      const totalBuyerCommissions =
-        totalFlatBuyerCommissions + totalPercentageBuyerCommissions;
-      const totalSellerCommissions =
-        totalFlatSellerCommissions + totalPercentageSellerCommissions;
+      const totalFlatSellerCommissions = state.commissions
+        .filter((com) => com.category === "Seller" && com.type === "Flat")
+        .reduce((sum, com) => sum + com.amount, 0);
+
+      // Adjusted gross profit after deducting flat commissions
+      const adjustedGrossProfit =
+        grossProfit - totalFlatBuyerCommissions - totalFlatSellerCommissions;
+
+      // Calculate percentage commissions based on adjusted gross profit
+      state.commissions.forEach((com) => {
+        if (com.type !== "Flat" && com.amount === null) {
+          // Check for null explicitly
+          const percentage = parseFloat(com.type.replace("%", "")) / 100;
+          com.amount = adjustedGrossProfit * percentage;
+          console.log(`Updated amount for ${com.type}: ${com.amount}`);
+        }
+      });
+
+      // Calculate total buyer and seller commissions
+      const totalBuyerCommissions = state.commissions
+        .filter((com) => com.category === "Buyer")
+        .reduce((sum, com) => sum + com.amount, 0);
+
+      const totalSellerCommissions = state.commissions
+        .filter((com) => com.category === "Seller")
+        .reduce((sum, com) => sum + com.amount, 0);
 
       // Total commissions and net profit calculations
       const totalCommissions = totalBuyerCommissions + totalSellerCommissions;
@@ -151,7 +154,6 @@ const commissionSlice = createSlice({
 
       // Storing calculated values
       state.calculations.grossProfit = grossProfit;
-      state.calculations.adjustedGrossProfit = adjustedGrossProfit;
       state.calculations.totalBuyerCommissions = totalBuyerCommissions;
       state.calculations.totalSellerCommissions = totalSellerCommissions;
       state.calculations.totalCommissions = totalCommissions;
@@ -163,14 +165,26 @@ const commissionSlice = createSlice({
     builder
       .addCase(fetchCommissions.fulfilled, (state, action) => {
         state.commissions = action.payload;
+        // Trigger recalculations after fetching commissions
+        commissionSlice.caseReducers.calculateCommissions(state, {
+          payload: { ...state.truckInfo },
+        });
       })
       .addCase(addCommission.fulfilled, (state, action) => {
         state.commissions.push(action.payload);
+        // Trigger recalculations after adding a commission
+        commissionSlice.caseReducers.calculateCommissions(state, {
+          payload: { ...state.truckInfo },
+        });
       })
       .addCase(deleteCommission.fulfilled, (state, action) => {
         state.commissions = state.commissions.filter(
           (commission) => commission.id !== action.meta.arg.commissionId
         );
+        // Trigger recalculations after deleting a commission
+        commissionSlice.caseReducers.calculateCommissions(state, {
+          payload: { ...state.truckInfo },
+        });
       })
       .addCase(updateCommission.fulfilled, (state, action) => {
         const index = state.commissions.findIndex(
@@ -182,6 +196,10 @@ const commissionSlice = createSlice({
             ...action.meta.arg.commissionData,
           };
         }
+        // Trigger recalculations after updating a commission
+        commissionSlice.caseReducers.calculateCommissions(state, {
+          payload: { ...state.truckInfo },
+        });
       });
   },
 });
