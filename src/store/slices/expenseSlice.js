@@ -30,8 +30,12 @@ export const addExpense = createAsyncThunk(
   "truck/addExpense",
   async ({ truckId, expenseData }, { dispatch, rejectWithValue }) => {
     try {
-      await addDoc(collection(db, "trucks", truckId, "expenses"), expenseData);
-      dispatch(fetchExpenses(truckId)); // Optionally refresh expenses list
+      const docRef = await addDoc(
+        collection(db, "trucks", truckId, "expenses"),
+        expenseData
+      );
+      dispatch(fetchExpenses(truckId)); // Refresh the expenses list
+      return { id: docRef.id, ...expenseData };
     } catch (error) {
       return rejectWithValue(error.toString());
     }
@@ -43,7 +47,7 @@ export const deleteExpense = createAsyncThunk(
   async ({ truckId, expenseId }, { dispatch, rejectWithValue }) => {
     try {
       await deleteDoc(doc(db, "trucks", truckId, "expenses", expenseId));
-      dispatch(fetchExpenses(truckId)); // Optionally refresh expenses list
+      dispatch(fetchExpenses(truckId)); // Refresh the expenses list
     } catch (error) {
       return rejectWithValue(error.toString());
     }
@@ -59,17 +63,36 @@ export const updateExpense = createAsyncThunk(
     try {
       const expenseRef = doc(db, "trucks", truckId, "expenses", expenseId);
       await updateDoc(expenseRef, expenseData);
-      dispatch(fetchExpenses(truckId)); // Optionally refresh expenses list
+      dispatch(fetchExpenses(truckId)); // Refresh the expenses list
     } catch (error) {
       return rejectWithValue(error.toString());
     }
   }
 );
 
+// Helper function to calculate totals
+const calculateTotals = (expenses) => {
+  const totals = expenses.reduce((acc, expense) => {
+    const category = expense.category;
+    const cost = Number(expense.cost) || 0;
+    if (!acc[category]) {
+      acc[category] = 0;
+    }
+    acc[category] += cost;
+    return acc;
+  }, {});
+  const totalExpenses = Object.values(totals).reduce(
+    (sum, amount) => sum + amount,
+    0
+  );
+  return { totals, totalExpenses };
+};
+
 const expenseSlice = createSlice({
-  name: "expenses",
+  name: "expense",
   initialState: {
     items: [],
+    loading: false,
     totalsByCategory: {},
     totalExpenses: 0,
     currentExpense: null,
@@ -88,24 +111,19 @@ const expenseSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchExpenses.pending, (state) => {
+        state.loading = true;
+      })
       .addCase(fetchExpenses.fulfilled, (state, action) => {
         state.items = action.payload;
-        // After fetching, calculate totals
-        const totals = action.payload.reduce((acc, expense) => {
-          const category = expense.category;
-          const cost = Number(expense.cost) || 0;
-          if (!acc[category]) {
-            acc[category] = 0;
-          }
-          acc[category] += cost;
-          return acc;
-        }, {});
-
+        const { totals, totalExpenses } = calculateTotals(action.payload);
         state.totalsByCategory = totals;
-        state.totalExpenses = Object.values(totals).reduce(
-          (sum, categoryTotal) => sum + categoryTotal,
-          0
-        );
+        state.totalExpenses = totalExpenses;
+        state.loading = false;
+      })
+      .addCase(fetchExpenses.rejected, (state, action) => {
+        state.loading = false;
+        console.error("Error fetching expenses:", action.error.message);
       })
       .addCase(addExpense.fulfilled, (state, action) => {
         state.items.push(action.payload); // Corrected from state.expenses to state.items

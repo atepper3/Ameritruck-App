@@ -9,21 +9,42 @@ import {
   setCurrentExpense,
   showExpenseModal,
 } from "../../store/slices/expenseSlice";
+import { fetchTruckDetails } from "../../store/slices/truckSlice";
 import ExpenseForm from "./ExpenseForm"; // Make sure to import ExpenseForm
 
 const ExpenseList = () => {
   const { id: truckId } = useParams();
   const dispatch = useDispatch();
-  // Correcting the useSelector to match the expenseSlice state structure
+
+  useEffect(() => {
+    if (truckId) {
+      dispatch(fetchTruckDetails(truckId)); // Fetch truck details
+      dispatch(fetchExpenses(truckId)); // Fetch expenses
+    }
+  }, [dispatch, truckId]);
+
+  const truckInfo = useSelector((state) => state.truck.truckInfo);
   const expense = useSelector((state) => state.expense.items);
+  const totalsByCategory = useSelector(
+    (state) => state.expense.totalsByCategory
+  );
+  const totalExpenses = useSelector((state) => state.expense.totalExpenses);
   const isExpenseModalOpen = useSelector(
     (state) => state.expense.isExpenseModalOpen
   );
+  const loading = useSelector(
+    (state) => state.expense.loading || state.truck.loading
+  );
 
-  useEffect(() => {
-    dispatch(fetchExpenses(truckId));
-  }, [dispatch, truckId]);
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
+  if (!truckInfo) {
+    return <p>Truck information not available.</p>; // Display message if truck info is not loaded
+  }
+
+  // Handler functions
   const handleEditExpense = (expense) => {
     dispatch(setCurrentExpense(expense));
     dispatch(showExpenseModal());
@@ -34,17 +55,9 @@ const ExpenseList = () => {
   };
 
   const handleAddExpense = () => {
-    dispatch(setCurrentExpense(null)); // Prepare for adding a new expense
+    dispatch(setCurrentExpense(null));
     dispatch(showExpenseModal());
   };
-
-  // Calculate total expenses dynamically based on fetched expenses
-  const totalExpenses = expense.reduce(
-    (acc, expense) => acc + Number(expense.cost || 0),
-    0
-  );
-
-  if (!expense) return <div>Loading...</div>;
 
   return (
     <>
@@ -117,9 +130,22 @@ const ExpenseList = () => {
         <Card.Body>
           <div className="table-responsive">
             <Table hover size="sm" className="mb-0 table-dark">
-              {" "}
-              {/* Removed bottom margin */}
               <tbody>
+                {/* Render a row for each category that has expenses */}
+                {Object.entries(totalsByCategory).map(
+                  ([category, total]) =>
+                    total > 0 && (
+                      <tr key={category}>
+                        <td style={{ fontWeight: "bold", textAlign: "left" }}>
+                          Total {category}:
+                        </td>
+                        <td style={{ fontWeight: "bold", textAlign: "right" }}>
+                          ${total.toFixed(2)}
+                        </td>
+                      </tr>
+                    )
+                )}
+                {/* Total expenses row */}
                 <tr>
                   <td style={{ fontWeight: "bold", textAlign: "left" }}>
                     Total Expenses:

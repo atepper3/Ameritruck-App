@@ -1,0 +1,15 @@
+Here is the current structure of commissions calculations:
+
+First, we calculate gross profit.  This is sale price - purchase price - total expenses.
+
+Then we have commission types. There is a buyer flat commission and a buyer %.  Then, there is a seller flat commission, and a seller %.
+
+Flat commissions work as you would expect, there is any kind of number in there.  For percentage commissions, they will only ever be either 10% or 15%.
+
+Percentage commissions, whether they are buyer or seller, are only calculated after all flat commissions, buyer or seller, have been calculated.  For example
+for a 10% buyer commission, you would take gross profit and subtract any flat commissions out, and then take 10% of that number.  Same idea with seller commissions.  However, these fields need to be able
+to adjust if flat commissions are added or subtracted later, as they depend on the flat commissions.  It may be helpful to assign an arbitrary const such as
+"adjustedGrossProfit" that takes gross profit and subtracts out total flat seller commissions and totalflat buyer commissions
+
+Commissions should be totaled in rows as total buyer commissions and total seller commissions, with a total commissions row under that.  For total buyer and total seller, we are not distinguishing by flat or percentage,
+it is all buyer commissions and all seller commissions that we want displayed.

@@ -20,9 +20,10 @@ const initialFormState = {
 
 const ExpenseForm = () => {
   const dispatch = useDispatch();
-  const { currentExpense, isExpenseModalOpen, truckInfo } = useSelector(
-    (state) => state.truck
+  const { currentExpense, isExpenseModalOpen } = useSelector(
+    (state) => state.expense
   );
+  const truckInfo = useSelector((state) => state.truck.truckInfo);
   const [formState, setFormState] = useState(initialFormState);
 
   // Populate form when editing an expense
@@ -50,6 +51,7 @@ const ExpenseForm = () => {
         })
       );
     } else {
+      console.log(truckInfo.id, formState);
       dispatch(addExpense({ truckId: truckInfo.id, expenseData: formState }));
     }
     closeModal();

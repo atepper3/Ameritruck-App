@@ -16,12 +16,14 @@ export const fetchCommissions = createAsyncThunk(
     try {
       const commissionsRef = collection(db, "trucks", truckId, "commissions");
       const querySnapshot = await getDocs(commissionsRef);
-      const commissions = querySnapshot.docs.map((doc) => ({
+      const results = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      return commissions;
+      console.log("Commissions fetched:", results); // Log fetched data
+      return results;
     } catch (error) {
+      console.error("Error fetching commissions:", error); // Log any errors
       return rejectWithValue(error.toString());
     }
   }
@@ -77,15 +79,86 @@ export const updateCommission = createAsyncThunk(
   }
 );
 
-// Commission Slice
-const commissionInitialState = {
-  commissions: [],
+const initialState = {
+  commissions: [], // List of all commissions
+  currentCommission: null, // Store the current commission being edited or viewed
+  showModal: false, // Control visibility of a modal or similar component
+  calculations: {
+    grossProfit: 0,
+    adjustedGrossProfit: 0,
+    totalBuyerCommissions: 0,
+    totalSellerCommissions: 0,
+    totalCommissions: 0,
+  },
 };
 
 const commissionSlice = createSlice({
   name: "commission",
-  initialState: commissionInitialState,
-  reducers: {},
+  initialState: initialState, // Initial state defined above,
+  reducers: {
+    showCommissionModal(state) {
+      state.showModal = true;
+    },
+    hideCommissionModal(state) {
+      state.showModal = false;
+    },
+    setCurrentCommission(state, action) {
+      state.currentCommission = action.payload;
+    },
+    calculateCommissions(state, action) {
+      const { totalExpenses, purchasePrice, salePrice } = action.payload;
+      const grossProfit = salePrice - purchasePrice - totalExpenses;
+
+      // Calculating total flat commissions
+      const totalFlatCommissions = state.commissions
+        .filter((com) => com.type === "Flat")
+        .reduce((sum, com) => sum + com.amount, 0);
+
+      // Adjusted gross profit used for percentage commissions
+      const adjustedGrossProfit = grossProfit - totalFlatCommissions;
+
+      // Calculating percentage commissions based on adjusted gross profit
+      const totalPercentageBuyerCommissions = state.commissions
+        .filter((com) => com.role === "Buyer" && com.type === "%")
+        .reduce(
+          (sum, com) => sum + adjustedGrossProfit * (com.amount / 100),
+          0
+        );
+      const totalPercentageSellerCommissions = state.commissions
+        .filter((com) => com.role === "Seller" && com.type === "%")
+        .reduce(
+          (sum, com) => sum + adjustedGrossProfit * (com.amount / 100),
+          0
+        );
+
+      // Calculating total flat commissions separately for buyers and sellers
+      const totalFlatBuyerCommissions = state.commissions
+        .filter((com) => com.role === "Buyer" && com.type === "Flat")
+        .reduce((sum, com) => sum + com.amount, 0);
+      const totalFlatSellerCommissions = state.commissions
+        .filter((com) => com.role === "Seller" && com.type === "Flat")
+        .reduce((sum, com) => sum + com.amount, 0);
+
+      // Total buyer and seller commissions
+      const totalBuyerCommissions =
+        totalFlatBuyerCommissions + totalPercentageBuyerCommissions;
+      const totalSellerCommissions =
+        totalFlatSellerCommissions + totalPercentageSellerCommissions;
+
+      // Total commissions and net profit calculations
+      const totalCommissions = totalBuyerCommissions + totalSellerCommissions;
+      const netProfit = grossProfit - totalCommissions;
+
+      // Storing calculated values
+      state.calculations.grossProfit = grossProfit;
+      state.calculations.adjustedGrossProfit = adjustedGrossProfit;
+      state.calculations.totalBuyerCommissions = totalBuyerCommissions;
+      state.calculations.totalSellerCommissions = totalSellerCommissions;
+      state.calculations.totalCommissions = totalCommissions;
+      state.calculations.netProfit = netProfit;
+    },
+  },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchCommissions.fulfilled, (state, action) => {
@@ -117,9 +190,7 @@ export const {
   showCommissionModal,
   hideCommissionModal,
   setCurrentCommission,
-  fetchComissionsFullfilled,
-  addCommissionFullfilled,
-  deleteCommissionFullfilled,
-  updateCommissionFullfilled,
+  calculateCommissions,
 } = commissionSlice.actions;
+
 export default commissionSlice.reducer;

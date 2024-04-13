@@ -1,108 +1,139 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
   fetchCommissions,
   deleteCommission,
+  setCurrentCommission,
+  showCommissionModal,
+  hideCommissionModal,
+  addCommission,
+  updateCommission,
+  calculateCommissions,
 } from "../../store/slices/commissionSlice";
 import { fetchTruckDetails } from "../../store/slices/truckSlice";
 import { Button, Table, Card } from "react-bootstrap";
-import CommissionForm from "./CommissionForm";
-import CommissionCalculator from "./CommissionCalculator";
+import CommissionForm from "./CommissionForm"; // Ensure this is the correct path
 
 const CommissionList = () => {
-  const { id: truckId } = useParams(); // Use useParams to get the truckId
+  const { id: truckId } = useParams();
   const dispatch = useDispatch();
-  const commissions = useSelector((state) => state.truck.commissions);
-  const [showCommissionForm, setShowCommissionForm] = useState(false);
-  const [currentCommission, setCurrentCommission] = useState(null); // New state for current commission
+  const commissions = useSelector((state) => state.commission.commissions);
+  const {
+    totalBuyerCommissions,
+    totalSellerCommissions,
+    totalCommissions,
+    netProfit = 0,
+  } = useSelector((state) => state.commission.calculations || {});
+
+  const totalExpenses = useSelector((state) => state.expense.totalExpenses);
+  const truckInfo = useSelector((state) => state.truck.truckInfo);
+  const showModal = useSelector((state) => state.commission.showModal);
+  const currentCommission = useSelector(
+    (state) => state.commission.currentCommission
+  );
 
   useEffect(() => {
     dispatch(fetchCommissions(truckId));
-    console.log("Fetching commissions for truckId:", truckId);
     dispatch(fetchTruckDetails(truckId));
   }, [dispatch, truckId]);
 
+  useEffect(() => {
+    if (truckInfo && totalExpenses != null) {
+      const { purchasePrice, salePrice } = truckInfo;
+      dispatch(
+        calculateCommissions({
+          totalExpenses,
+          purchasePrice,
+          salePrice,
+        })
+      );
+    }
+  }, [dispatch, truckInfo, totalExpenses]);
+
   const handleAddCommission = () => {
-    setCurrentCommission(null); // No current commission when adding
-    setShowCommissionForm(true);
+    dispatch(setCurrentCommission(null));
+    dispatch(showCommissionModal());
   };
 
   const handleEditCommission = (commission) => {
-    setCurrentCommission(commission); // Set current commission for editing
-    setShowCommissionForm(true);
+    dispatch(setCurrentCommission(commission));
+    dispatch(showCommissionModal());
   };
 
   const handleDeleteCommission = (commissionId) => {
     dispatch(deleteCommission({ truckId, commissionId }));
   };
 
-  // Modify the commission submit handler if necessary
   const handleCommissionSubmit = (commissionData) => {
-    // Logic after submitting the commission, e.g., refreshing the list
-    dispatch(fetchCommissions(truckId));
-    setShowCommissionForm(false); // Close the form upon submission
+    if (!currentCommission) {
+      dispatch(addCommission({ truckId, commissionData }));
+    } else {
+      dispatch(
+        updateCommission({
+          truckId,
+          commissionId: currentCommission.id,
+          commissionData,
+        })
+      );
+    }
+    dispatch(hideCommissionModal());
   };
 
   const handleClose = () => {
-    setShowCommissionForm(false);
-    setCurrentCommission(null); // Reset current commission on close
+    dispatch(hideCommissionModal());
   };
+
+  const commissionCategories = [
+    { title: "Buyer Commissions", role: "Buyer" },
+    { title: "Seller Commissions", role: "Seller" },
+  ];
 
   return (
     <div>
       <Button variant="primary" onClick={handleAddCommission}>
         Add Commission
       </Button>
-      {/* CommissionForm modal */}
-      {showCommissionForm && (
+      {showModal && (
         <CommissionForm
-          show={showCommissionForm}
+          show={showModal}
           handleClose={handleClose}
           commissionData={currentCommission}
           truckId={truckId}
-          onSubmit={handleCommissionSubmit} // Pass handleCommissionSubmit as a prop
+          onSubmit={handleCommissionSubmit}
         />
       )}
 
-      {["Buyer Commissions", "Seller Commissions"].map((title, index) => {
-        const isBuyer = index === 0;
-        const filteredCommissions = commissions.filter((commission) =>
-          isBuyer
-            ? commission.type.includes("Buyer")
-            : commission.type.includes("Seller")
-        );
-
-        return (
-          <Card className="shadow mb-4" key={title}>
-            <Card.Header className="bg-transparent">{title}</Card.Header>
-            <Card.Body>
-              <Table hover variant="dark" size="sm">
-                <thead>
-                  <tr>
-                    <th>Type</th>
-                    <th>Name</th>
-                    <th>Amount</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredCommissions.map((commission) => (
+      {commissionCategories.map(({ title, role }) => (
+        <Card key={title} className="shadow mb-4">
+          <Card.Header className="bg-transparent">{title}</Card.Header>
+          <Card.Body>
+            <Table hover variant="dark">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Name</th>
+                  <th>Amount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {commissions
+                  .filter((c) => c.role === role)
+                  .map((commission) => (
                     <tr key={commission.id}>
                       <td>{commission.type}</td>
                       <td>{commission.name}</td>
-                      <td>${commission.amount}</td>
+                      <td>${commission.amount.toFixed(2)}</td>
                       <td>
                         <Button
                           variant="secondary"
-                          size="sm"
                           onClick={() => handleEditCommission(commission)}
                         >
                           Edit
                         </Button>{" "}
                         <Button
                           variant="danger"
-                          size="sm"
                           onClick={() => handleDeleteCommission(commission.id)}
                         >
                           Delete
@@ -110,12 +141,38 @@ const CommissionList = () => {
                       </td>
                     </tr>
                   ))}
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
-        );
-      })}
+              </tbody>
+            </Table>
+          </Card.Body>
+        </Card>
+      ))}
+
+      {/* Totals and Net Profit Card */}
+      <Card className="shadow mb-4">
+        <Card.Header className="bg-transparent">Summary</Card.Header>
+        <Card.Body>
+          <Table hover variant="dark">
+            <tbody>
+              <tr>
+                <td>Total Buyer's Commissions</td>
+                <td>${totalBuyerCommissions.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>Total Seller's Commissions</td>
+                <td>${totalSellerCommissions.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>Total Commissions</td>
+                <td>${totalCommissions.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>Net Profit</td>
+                <td>${netProfit.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </Table>
+        </Card.Body>
+      </Card>
     </div>
   );
 };
