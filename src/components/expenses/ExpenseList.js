@@ -8,6 +8,7 @@ import {
   deleteExpense,
   setCurrentExpense,
   showExpenseModal,
+  fetchTotalExpenses,
 } from "../../store/slices/expenseSlice";
 import { fetchTruckDetails } from "../../store/slices/truckSlice";
 import ExpenseForm from "./ExpenseForm"; // Make sure to import ExpenseForm
@@ -20,6 +21,7 @@ const ExpenseList = () => {
     if (truckId) {
       dispatch(fetchTruckDetails(truckId)); // Fetch truck details
       dispatch(fetchExpenses(truckId)); // Fetch expenses
+      dispatch(fetchTotalExpenses(truckId)); // Fetch total expenses
     }
   }, [dispatch, truckId]);
 

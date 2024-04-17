@@ -7,8 +7,45 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  getDoc,
+  setDoc,
 } from "firebase/firestore";
 
+// Utility function to fetch or initialize total expenses
+async function fetchOrInitializeTotals(truckId) {
+  const totalsRef = doc(db, "trucks", truckId, "totals", "financials");
+  const totalsSnap = await getDoc(totalsRef);
+  if (!totalsSnap.exists()) {
+    await setDoc(totalsRef, { totalExpenses: 0 }); // Initialize with zero
+    return 0;
+  }
+  return totalsSnap.data().totalExpenses;
+}
+
+// Async thunk to fetch total expenses for a truck
+export const fetchTotalExpenses = createAsyncThunk(
+  "truck/fetchTotalExpenses",
+  async (truckId, { rejectWithValue }) => {
+    try {
+      const totalsRef = doc(db, "trucks", truckId, "totals", "financials");
+      const docSnap = await getDoc(totalsRef);
+      if (docSnap.exists()) {
+        return docSnap.data().totalExpenses;
+      }
+      return 0; // Return 0 if no document exists
+    } catch (error) {
+      return rejectWithValue(error.toString());
+    }
+  }
+);
+
+// Utility function to update total expenses
+async function updateTotalExpenses(truckId, newTotal) {
+  const totalsRef = doc(db, "trucks", truckId, "totals", "financials");
+  await setDoc(totalsRef, { totalExpenses: newTotal }, { merge: true });
+}
+
+// Async thunk to fetch expenses
 export const fetchExpenses = createAsyncThunk(
   "truck/fetchExpenses",
   async (truckId, { rejectWithValue }) => {
@@ -26,6 +63,7 @@ export const fetchExpenses = createAsyncThunk(
   }
 );
 
+// Async thunk to add an expense
 export const addExpense = createAsyncThunk(
   "truck/addExpense",
   async ({ truckId, expenseData }, { dispatch, rejectWithValue }) => {
@@ -34,6 +72,9 @@ export const addExpense = createAsyncThunk(
         collection(db, "trucks", truckId, "expenses"),
         expenseData
       );
+      const newExpenseAmount = Number(expenseData.cost) || 0;
+      const currentTotal = await fetchOrInitializeTotals(truckId);
+      await updateTotalExpenses(truckId, currentTotal + newExpenseAmount);
       dispatch(fetchExpenses(truckId)); // Refresh the expenses list
       return { id: docRef.id, ...expenseData };
     } catch (error) {
@@ -42,11 +83,17 @@ export const addExpense = createAsyncThunk(
   }
 );
 
+// Async thunk to delete an expense
 export const deleteExpense = createAsyncThunk(
   "truck/deleteExpense",
-  async ({ truckId, expenseId }, { dispatch, rejectWithValue }) => {
+  async (
+    { truckId, expenseId, expenseCost },
+    { dispatch, rejectWithValue }
+  ) => {
     try {
       await deleteDoc(doc(db, "trucks", truckId, "expenses", expenseId));
+      const currentTotal = await fetchOrInitializeTotals(truckId);
+      await updateTotalExpenses(truckId, currentTotal - Number(expenseCost));
       dispatch(fetchExpenses(truckId)); // Refresh the expenses list
     } catch (error) {
       return rejectWithValue(error.toString());
@@ -54,15 +101,22 @@ export const deleteExpense = createAsyncThunk(
   }
 );
 
+// Async thunk to update an expense
 export const updateExpense = createAsyncThunk(
   "truck/updateExpense",
   async (
-    { truckId, expenseId, expenseData },
+    { truckId, expenseId, expenseData, previousCost },
     { dispatch, rejectWithValue }
   ) => {
     try {
       const expenseRef = doc(db, "trucks", truckId, "expenses", expenseId);
       await updateDoc(expenseRef, expenseData);
+      const currentTotal = await fetchOrInitializeTotals(truckId);
+      const newExpenseAmount = Number(expenseData.cost) || 0;
+      await updateTotalExpenses(
+        truckId,
+        currentTotal - Number(previousCost) + newExpenseAmount
+      );
       dispatch(fetchExpenses(truckId)); // Refresh the expenses list
     } catch (error) {
       return rejectWithValue(error.toString());
@@ -114,6 +168,9 @@ const expenseSlice = createSlice({
       .addCase(fetchExpenses.pending, (state) => {
         state.loading = true;
       })
+      .addCase(fetchTotalExpenses.fulfilled, (state, action) => {
+        state.totalExpenses = action.payload;
+      })
       .addCase(fetchExpenses.fulfilled, (state, action) => {
         state.items = action.payload;
         const { totals, totalExpenses } = calculateTotals(action.payload);
@@ -126,17 +183,17 @@ const expenseSlice = createSlice({
         console.error("Error fetching expenses:", action.error.message);
       })
       .addCase(addExpense.fulfilled, (state, action) => {
-        state.items.push(action.payload); // Corrected from state.expenses to state.items
+        state.items.push(action.payload);
       })
       .addCase(deleteExpense.fulfilled, (state, action) => {
         state.items = state.items.filter(
           (expense) => expense.id !== action.meta.arg.expenseId
-        ); // Corrected from state.expenses to state.items
+        );
       })
       .addCase(updateExpense.fulfilled, (state, action) => {
         const index = state.items.findIndex(
           (expense) => expense.id === action.meta.arg.expenseId
-        ); // Corrected from state.expenses to state.items
+        );
         if (index !== -1) {
           state.items[index] = {
             ...state.items[index],
