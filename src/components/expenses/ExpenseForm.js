@@ -40,21 +40,42 @@ const ExpenseForm = () => {
     setFormState((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (currentExpense) {
-      dispatch(
-        updateExpense({
-          truckId: truckInfo.id,
-          expenseId: currentExpense.id,
-          expenseData: formState,
-        })
-      );
-    } else {
-      console.log(truckInfo.id, formState);
-      dispatch(addExpense({ truckId: truckInfo.id, expenseData: formState }));
+
+    const formattedData = {
+      ...formState,
+      cost: formState.cost.trim() === "" ? 0 : Number(formState.cost), // Convert cost to number, default to 0 if empty
+    };
+
+    if (isNaN(formattedData.cost)) {
+      alert("Invalid cost value. Please enter a valid number.");
+      return; // Prevent dispatching if cost is NaN
     }
-    closeModal();
+
+    try {
+      if (currentExpense) {
+        await dispatch(
+          updateExpense({
+            truckId: truckInfo.id,
+            expenseId: currentExpense.id,
+            expenseData: formattedData,
+            previousCost: currentExpense.cost, // Ensure this value is correctly passed
+          })
+        ).unwrap();
+      } else {
+        await dispatch(
+          addExpense({
+            truckId: truckInfo.id,
+            expenseData: formattedData,
+          })
+        ).unwrap();
+      }
+      closeModal(); // Close modal after successful action completion
+    } catch (error) {
+      console.error("Failed to submit expense data:", error);
+      alert("Failed to update the expense. Please try again.");
+    }
   };
 
   // Close modal and reset form state

@@ -17,14 +17,6 @@ const ExpenseList = () => {
   const { id: truckId } = useParams();
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (truckId) {
-      dispatch(fetchTruckDetails(truckId)); // Fetch truck details
-      dispatch(fetchExpenses(truckId)); // Fetch expenses
-      dispatch(fetchTotalExpenses(truckId)); // Fetch total expenses
-    }
-  }, [dispatch, truckId]);
-
   const truckInfo = useSelector((state) => state.truck.truckInfo);
   const expense = useSelector((state) => state.expense.items);
   const totalsByCategory = useSelector(
@@ -37,6 +29,19 @@ const ExpenseList = () => {
   const loading = useSelector(
     (state) => state.expense.loading || state.truck.loading
   );
+
+  useEffect(() => {
+    if (truckId) {
+      dispatch(fetchTruckDetails(truckId)); // Fetch truck details
+      dispatch(fetchExpenses(truckId)); // Fetch expenses
+    }
+  }, [dispatch, truckId]);
+
+  useEffect(() => {
+    if (truckId) {
+      dispatch(fetchTotalExpenses(truckId));
+    }
+  }, [dispatch, truckId, expense.length]);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -52,8 +57,8 @@ const ExpenseList = () => {
     dispatch(showExpenseModal());
   };
 
-  const handleDeleteExpense = (expenseId) => {
-    dispatch(deleteExpense({ truckId, expenseId }));
+  const handleDeleteExpense = (expenseId, cost) => {
+    dispatch(deleteExpense({ truckId, expenseId, expenseCost: cost }));
   };
 
   const handleAddExpense = () => {
@@ -113,7 +118,9 @@ const ExpenseList = () => {
                         <Button
                           variant="danger"
                           size="sm"
-                          onClick={() => handleDeleteExpense(expense.id)}
+                          onClick={() =>
+                            handleDeleteExpense(expense.id, expense.cost)
+                          }
                         >
                           Delete
                         </Button>

@@ -16,10 +16,17 @@ async function fetchOrInitializeTotals(truckId) {
   const totalsRef = doc(db, "trucks", truckId, "totals", "financials");
   const totalsSnap = await getDoc(totalsRef);
   if (!totalsSnap.exists()) {
+    console.log("Initialising total expenses to 0 as it does not exist.");
     await setDoc(totalsRef, { totalExpenses: 0 }); // Initialize with zero
-    return 0;
+    return 0; // Ensure returning a number
   }
-  return totalsSnap.data().totalExpenses;
+  const totalExpenses = totalsSnap.data().totalExpenses;
+  if (typeof totalExpenses !== "number" || isNaN(totalExpenses)) {
+    console.error("Fetched total expenses is not a number, initializing to 0.");
+    await setDoc(totalsRef, { totalExpenses: 0 });
+    return 0; // Safe fallback
+  }
+  return totalExpenses;
 }
 
 // Async thunk to fetch total expenses for a truck
@@ -39,9 +46,13 @@ export const fetchTotalExpenses = createAsyncThunk(
   }
 );
 
-// Utility function to update total expenses
 async function updateTotalExpenses(truckId, newTotal) {
+  if (isNaN(newTotal)) {
+    console.error("Attempted to update total expenses with NaN", newTotal);
+    return; // Prevent update if newTotal is NaN
+  }
   const totalsRef = doc(db, "trucks", truckId, "totals", "financials");
+  console.log("Updating total expenses to:", newTotal);
   await setDoc(totalsRef, { totalExpenses: newTotal }, { merge: true });
 }
 
@@ -63,20 +74,26 @@ export const fetchExpenses = createAsyncThunk(
   }
 );
 
-// Async thunk to add an expense
 export const addExpense = createAsyncThunk(
   "truck/addExpense",
   async ({ truckId, expenseData }, { dispatch, rejectWithValue }) => {
     try {
+      const costAsNumber = Number(expenseData.cost);
+      if (isNaN(costAsNumber)) {
+        console.error("Invalid cost value", expenseData.cost);
+        return rejectWithValue("Invalid cost value");
+      }
+
       const docRef = await addDoc(
         collection(db, "trucks", truckId, "expenses"),
-        expenseData
+        { ...expenseData, cost: costAsNumber }
       );
-      const newExpenseAmount = Number(expenseData.cost) || 0;
       const currentTotal = await fetchOrInitializeTotals(truckId);
-      await updateTotalExpenses(truckId, currentTotal + newExpenseAmount);
-      dispatch(fetchExpenses(truckId)); // Refresh the expenses list
-      return { id: docRef.id, ...expenseData };
+      console.log("New expense amount:", costAsNumber);
+      console.log("Current total:", currentTotal);
+      await updateTotalExpenses(truckId, currentTotal + costAsNumber);
+      dispatch(fetchExpenses(truckId));
+      return { id: docRef.id, ...expenseData, cost: costAsNumber };
     } catch (error) {
       return rejectWithValue(error.toString());
     }
@@ -101,7 +118,6 @@ export const deleteExpense = createAsyncThunk(
   }
 );
 
-// Async thunk to update an expense
 export const updateExpense = createAsyncThunk(
   "truck/updateExpense",
   async (
@@ -109,24 +125,61 @@ export const updateExpense = createAsyncThunk(
     { dispatch, rejectWithValue }
   ) => {
     try {
+      // Log the original data received
+      console.log(
+        "Received data for update:",
+        expenseData.cost,
+        "Previous cost:",
+        previousCost
+      );
+
+      const newExpenseAmount = Number(expenseData.cost);
+      const previousExpenseAmount = Number(previousCost);
+
+      // Log the converted numbers
+      console.log(
+        "Converted new expense amount:",
+        newExpenseAmount,
+        "Converted previous expense amount:",
+        previousExpenseAmount
+      );
+
+      if (isNaN(newExpenseAmount) || isNaN(previousExpenseAmount)) {
+        console.error("Error: Invalid cost value");
+        return rejectWithValue("Invalid cost value");
+      }
+
       const expenseRef = doc(db, "trucks", truckId, "expenses", expenseId);
-      await updateDoc(expenseRef, expenseData);
+      await updateDoc(expenseRef, {
+        ...expenseData,
+        cost: newExpenseAmount, // Ensure cost is updated as a number
+      });
+
       const currentTotal = await fetchOrInitializeTotals(truckId);
-      const newExpenseAmount = Number(expenseData.cost) || 0;
       await updateTotalExpenses(
         truckId,
-        currentTotal - Number(previousCost) + newExpenseAmount
+        currentTotal - previousExpenseAmount + newExpenseAmount
       );
-      dispatch(fetchExpenses(truckId)); // Refresh the expenses list
+
+      dispatch(fetchExpenses(truckId)); // Refresh the expenses list after update
+      dispatch(fetchTotalExpenses(truckId)); // Refresh the total expenses
+
+      // This will return the updated expense data which should be handled in your Redux slice to update the state
+      return {
+        id: expenseId,
+        ...expenseData,
+        cost: newExpenseAmount,
+      };
     } catch (error) {
+      console.error("Update expense failed with error:", error);
       return rejectWithValue(error.toString());
     }
   }
 );
 
-// Helper function to calculate totals
-const calculateTotals = (expenses) => {
-  const totals = expenses.reduce((acc, expense) => {
+// Helper function to calculate category totals only
+const calculateCategoryTotals = (expenses) => {
+  const totalsByCategory = expenses.reduce((acc, expense) => {
     const category = expense.category;
     const cost = Number(expense.cost) || 0;
     if (!acc[category]) {
@@ -135,11 +188,7 @@ const calculateTotals = (expenses) => {
     acc[category] += cost;
     return acc;
   }, {});
-  const totalExpenses = Object.values(totals).reduce(
-    (sum, amount) => sum + amount,
-    0
-  );
-  return { totals, totalExpenses };
+  return totalsByCategory;
 };
 
 const expenseSlice = createSlice({
@@ -173,9 +222,7 @@ const expenseSlice = createSlice({
       })
       .addCase(fetchExpenses.fulfilled, (state, action) => {
         state.items = action.payload;
-        const { totals, totalExpenses } = calculateTotals(action.payload);
-        state.totalsByCategory = totals;
-        state.totalExpenses = totalExpenses;
+        state.totalsByCategory = calculateCategoryTotals(action.payload);
         state.loading = false;
       })
       .addCase(fetchExpenses.rejected, (state, action) => {
@@ -192,13 +239,10 @@ const expenseSlice = createSlice({
       })
       .addCase(updateExpense.fulfilled, (state, action) => {
         const index = state.items.findIndex(
-          (expense) => expense.id === action.meta.arg.expenseId
+          (expense) => expense.id === action.payload.id
         );
         if (index !== -1) {
-          state.items[index] = {
-            ...state.items[index],
-            ...action.meta.arg.expenseData,
-          };
+          state.items[index] = action.payload; // Update the expense in the state with the returned payload
         }
       });
   },
