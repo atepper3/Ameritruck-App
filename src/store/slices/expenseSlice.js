@@ -11,24 +11,6 @@ import {
   setDoc,
 } from "firebase/firestore";
 
-// Utility function to fetch or initialize total expenses
-async function fetchOrInitializeTotals(truckId) {
-  const totalsRef = doc(db, "trucks", truckId, "totals", "financials");
-  const totalsSnap = await getDoc(totalsRef);
-  if (!totalsSnap.exists()) {
-    console.log("Initialising total expenses to 0 as it does not exist.");
-    await setDoc(totalsRef, { totalExpenses: 0 }); // Initialize with zero
-    return 0; // Ensure returning a number
-  }
-  const totalExpenses = totalsSnap.data().totalExpenses;
-  if (typeof totalExpenses !== "number" || isNaN(totalExpenses)) {
-    console.error("Fetched total expenses is not a number, initializing to 0.");
-    await setDoc(totalsRef, { totalExpenses: 0 });
-    return 0; // Safe fallback
-  }
-  return totalExpenses;
-}
-
 // Async thunk to fetch total expenses for a truck
 export const fetchTotalExpenses = createAsyncThunk(
   "truck/fetchTotalExpenses",
@@ -45,16 +27,6 @@ export const fetchTotalExpenses = createAsyncThunk(
     }
   }
 );
-
-async function updateTotalExpenses(truckId, newTotal) {
-  if (isNaN(newTotal)) {
-    console.error("Attempted to update total expenses with NaN", newTotal);
-    return; // Prevent update if newTotal is NaN
-  }
-  const totalsRef = doc(db, "trucks", truckId, "totals", "financials");
-  console.log("Updating total expenses to:", newTotal);
-  await setDoc(totalsRef, { totalExpenses: newTotal }, { merge: true });
-}
 
 // Async thunk to fetch expenses
 export const fetchExpenses = createAsyncThunk(
@@ -76,23 +48,17 @@ export const fetchExpenses = createAsyncThunk(
 
 export const addExpense = createAsyncThunk(
   "truck/addExpense",
-  async ({ truckId, expenseData }, { dispatch, rejectWithValue }) => {
+  async ({ truckId, expenseData }, { rejectWithValue }) => {
     try {
       const costAsNumber = Number(expenseData.cost);
       if (isNaN(costAsNumber)) {
         console.error("Invalid cost value", expenseData.cost);
         return rejectWithValue("Invalid cost value");
       }
-
       const docRef = await addDoc(
         collection(db, "trucks", truckId, "expenses"),
         { ...expenseData, cost: costAsNumber }
       );
-      const currentTotal = await fetchOrInitializeTotals(truckId);
-      console.log("New expense amount:", costAsNumber);
-      console.log("Current total:", currentTotal);
-      await updateTotalExpenses(truckId, currentTotal + costAsNumber);
-      dispatch(fetchExpenses(truckId));
       return { id: docRef.id, ...expenseData, cost: costAsNumber };
     } catch (error) {
       return rejectWithValue(error.toString());
@@ -100,18 +66,12 @@ export const addExpense = createAsyncThunk(
   }
 );
 
-// Async thunk to delete an expense
 export const deleteExpense = createAsyncThunk(
   "truck/deleteExpense",
-  async (
-    { truckId, expenseId, expenseCost },
-    { dispatch, rejectWithValue }
-  ) => {
+  async ({ truckId, expenseId, expenseCost }, { rejectWithValue }) => {
     try {
       await deleteDoc(doc(db, "trucks", truckId, "expenses", expenseId));
-      const currentTotal = await fetchOrInitializeTotals(truckId);
-      await updateTotalExpenses(truckId, currentTotal - Number(expenseCost));
-      dispatch(fetchExpenses(truckId)); // Refresh the expenses list
+      return { truckId, expenseId, expenseCost: -Number(expenseCost) }; // No need to handle total here
     } catch (error) {
       return rejectWithValue(error.toString());
     }
@@ -122,56 +82,24 @@ export const updateExpense = createAsyncThunk(
   "truck/updateExpense",
   async (
     { truckId, expenseId, expenseData, previousCost },
-    { dispatch, rejectWithValue }
+    { rejectWithValue }
   ) => {
     try {
-      // Log the original data received
-      console.log(
-        "Received data for update:",
-        expenseData.cost,
-        "Previous cost:",
-        previousCost
-      );
-
       const newExpenseAmount = Number(expenseData.cost);
-      const previousExpenseAmount = Number(previousCost);
-
-      // Log the converted numbers
-      console.log(
-        "Converted new expense amount:",
-        newExpenseAmount,
-        "Converted previous expense amount:",
-        previousExpenseAmount
-      );
-
-      if (isNaN(newExpenseAmount) || isNaN(previousExpenseAmount)) {
+      if (isNaN(newExpenseAmount)) {
         console.error("Error: Invalid cost value");
         return rejectWithValue("Invalid cost value");
       }
-
-      const expenseRef = doc(db, "trucks", truckId, "expenses", expenseId);
-      await updateDoc(expenseRef, {
-        ...expenseData,
-        cost: newExpenseAmount, // Ensure cost is updated as a number
-      });
-
-      const currentTotal = await fetchOrInitializeTotals(truckId);
-      await updateTotalExpenses(
-        truckId,
-        currentTotal - previousExpenseAmount + newExpenseAmount
-      );
-
-      dispatch(fetchExpenses(truckId)); // Refresh the expenses list after update
-      dispatch(fetchTotalExpenses(truckId)); // Refresh the total expenses
-
-      // This will return the updated expense data which should be handled in your Redux slice to update the state
-      return {
-        id: expenseId,
+      await updateDoc(doc(db, "trucks", truckId, "expenses", expenseId), {
         ...expenseData,
         cost: newExpenseAmount,
+      });
+      return {
+        truckId,
+        expenseId,
+        delta: newExpenseAmount - Number(previousCost),
       };
     } catch (error) {
-      console.error("Update expense failed with error:", error);
       return rejectWithValue(error.toString());
     }
   }

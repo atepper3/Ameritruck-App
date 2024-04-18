@@ -1,5 +1,10 @@
 import { createListenerMiddleware } from "@reduxjs/toolkit";
-import { db } from "../../firebase";
+import {
+  addExpense,
+  deleteExpense,
+  updateExpense,
+} from "../../slices/expenseSlice";
+import { db } from "../../../firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
 // Update or initialize the total expenses in the database
@@ -13,10 +18,10 @@ async function updateTotalExpenses(truckId, delta) {
   await setDoc(totalsRef, { totalExpenses: newTotal }, { merge: true });
 }
 
-const expenseMiddleware = createListenerMiddleware();
+const totalExpensesMiddle = createListenerMiddleware();
 
 // Listening for when an expense is added to update the total
-expenseMiddleware.startListening({
+totalExpensesMiddle.startListening({
   actionCreator: addExpense.fulfilled,
   effect: async (action, listenerApi) => {
     const { truckId, expenseData } = action.meta.arg;
@@ -26,23 +31,22 @@ expenseMiddleware.startListening({
 });
 
 // Listening for when an expense is deleted to update the total
-expenseMiddleware.startListening({
+totalExpensesMiddle.startListening({
   actionCreator: deleteExpense.fulfilled,
   effect: async (action, listenerApi) => {
-    const { truckId, expenseId, expenseCost } = action.meta.arg;
+    const { truckId, expenseCost } = action.meta.arg; // Removed unused expenseId here
     const costAsNumber = -Number(expenseCost); // Negative because we're subtracting this expense
     await updateTotalExpenses(truckId, costAsNumber);
   },
 });
 
 // Listening for when an expense is updated to update the total correctly
-expenseMiddleware.startListening({
+totalExpensesMiddle.startListening({
   actionCreator: updateExpense.fulfilled,
   effect: async (action, listenerApi) => {
-    const { truckId, expenseId, expenseData, previousCost } = action.meta.arg;
-    const delta = Number(expenseData.cost) - Number(previousCost);
+    const { truckId, delta } = action.meta.arg; // Kept delta which includes expenseId's effect
     await updateTotalExpenses(truckId, delta);
   },
 });
 
-export default expenseMiddleware;
+export default totalExpensesMiddle.middleware;
