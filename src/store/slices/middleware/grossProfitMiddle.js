@@ -4,9 +4,9 @@ import {
   addExpense,
   deleteExpense,
   updateExpense,
-} from "./slices/expenseSlice";
-import { fetchTruckDetails, updateTruckDetails } from "./slices/truckSlice";
-import { calculateCommissions } from "./slices/commissionSlice"; // Import the action
+} from "../expenseSlice";
+import { fetchTruckDetails, updateTruckDetails } from "../truckSlice";
+import { calculateCommissions } from "../commissionSlice"; // Import the action
 
 const listenerMiddleware = createListenerMiddleware();
 
@@ -60,4 +60,4 @@ listenerMiddleware.startListening({
   },
 });
 
-export default listenerMiddleware;
+export default grossProfitMiddle;
