@@ -4,7 +4,6 @@ import { Modal, Form, Button } from "react-bootstrap";
 import {
   addExpense,
   updateExpense,
-  showExpenseModal,
   hideExpenseModal,
 } from "../../store/slices/expenseSlice";
 

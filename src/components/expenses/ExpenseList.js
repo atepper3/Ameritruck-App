@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
-import { Card } from "react-bootstrap";
-import { Button, Table } from "react-bootstrap";
+import { Card, Button, Table } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
@@ -8,17 +7,16 @@ import {
   deleteExpense,
   setCurrentExpense,
   showExpenseModal,
-  fetchTotalExpenses,
 } from "../../store/slices/expenseSlice";
 import { fetchTruckDetails } from "../../store/slices/truckSlice";
-import ExpenseForm from "./ExpenseForm"; // Make sure to import ExpenseForm
+import ExpenseForm from "./ExpenseForm"; // Ensure ExpenseForm is correctly imported
 
 const ExpenseList = () => {
   const { id: truckId } = useParams();
   const dispatch = useDispatch();
 
   const truckInfo = useSelector((state) => state.truck.truckInfo);
-  const expense = useSelector((state) => state.expense.items);
+  const expenses = useSelector((state) => state.expense.items);
   const totalsByCategory = useSelector(
     (state) => state.expense.totalsByCategory
   );
@@ -33,15 +31,9 @@ const ExpenseList = () => {
   useEffect(() => {
     if (truckId) {
       dispatch(fetchTruckDetails(truckId)); // Fetch truck details
-      dispatch(fetchExpenses(truckId)); // Fetch expenses
+      dispatch(fetchExpenses(truckId)); // This fetches expenses and initializes/updates total expenses
     }
   }, [dispatch, truckId]);
-
-  useEffect(() => {
-    if (truckId) {
-      dispatch(fetchTotalExpenses(truckId));
-    }
-  }, [dispatch, truckId, expense.length]);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -71,21 +63,13 @@ const ExpenseList = () => {
       <Button onClick={handleAddExpense}>Add Expense</Button>
       <ExpenseForm show={isExpenseModalOpen} />
 
-      {/* Expenses Card */}
       <Card className="shadow mb-4">
-        {" "}
-        {/* Add bottom margin to separate the cards */}
         <Card.Header className="bg-transparent">
-          <h4 className="text-center mb-2">Expenses</h4>{" "}
-          {/* Reduced bottom margin */}
+          <h4 className="text-center mb-2">Expenses</h4>
         </Card.Header>
         <Card.Body className="pt-0">
-          {" "}
-          {/* Reduce padding-top if needed */}
           <div className="table-responsive">
             <Table hover size="sm" className="mb-0 table-dark">
-              {" "}
-              {/* Removed bottom margin */}
               <thead>
                 <tr>
                   <th>Category</th>
@@ -98,63 +82,57 @@ const ExpenseList = () => {
                 </tr>
               </thead>
               <tbody>
-                {expense.map((expense) =>
-                  expense ? (
-                    <tr key={expense.id}>
-                      <td>{expense.category}</td>
-                      <td>{expense.descriptionOfWork}</td>
-                      <td>{expense.vendor}</td>
-                      <td>${expense.cost}</td>
-                      <td>{expense.dateEntered}</td>
-                      <td>{expense.paidOnDate}</td>
-                      <td>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => handleEditExpense(expense)}
-                        >
-                          Edit
-                        </Button>{" "}
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() =>
-                            handleDeleteExpense(expense.id, expense.cost)
-                          }
-                        >
-                          Delete
-                        </Button>
-                      </td>
-                    </tr>
-                  ) : null
-                )}
+                {expenses.map((expense) => (
+                  <tr key={expense.id}>
+                    <td>{expense.category}</td>
+                    <td>{expense.descriptionOfWork}</td>
+                    <td>{expense.vendor}</td>
+                    <td>${expense.cost.toFixed(2)}</td>
+                    <td>{expense.dateEntered}</td>
+                    <td>{expense.paidOnDate}</td>
+                    <td>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleEditExpense(expense)}
+                      >
+                        Edit
+                      </Button>{" "}
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() =>
+                          handleDeleteExpense(expense.id, expense.cost)
+                        }
+                      >
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </Table>
           </div>
         </Card.Body>
       </Card>
 
-      {/* Total Expenses Card */}
       <Card className="shadow">
         <Card.Body>
           <div className="table-responsive">
             <Table hover size="sm" className="mb-0 table-dark">
               <tbody>
-                {/* Render a row for each category that has expenses */}
-                {Object.entries(totalsByCategory).map(
-                  ([category, total]) =>
-                    total > 0 && (
-                      <tr key={category}>
-                        <td style={{ fontWeight: "bold", textAlign: "left" }}>
-                          Total {category}:
-                        </td>
-                        <td style={{ fontWeight: "bold", textAlign: "right" }}>
-                          ${total.toFixed(2)}
-                        </td>
-                      </tr>
-                    )
+                {Object.entries(totalsByCategory).map(([category, total]) =>
+                  total > 0 ? (
+                    <tr key={category}>
+                      <td style={{ fontWeight: "bold", textAlign: "left" }}>
+                        Total {category}:
+                      </td>
+                      <td style={{ fontWeight: "bold", textAlign: "right" }}>
+                        ${total.toFixed(2)}
+                      </td>
+                    </tr>
+                  ) : null
                 )}
-                {/* Total expenses row */}
                 <tr>
                   <td style={{ fontWeight: "bold", textAlign: "left" }}>
                     Total Expenses:
