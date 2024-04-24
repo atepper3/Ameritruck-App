@@ -1,5 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { db } from "../../firebase";
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
   doc,
   getDocs,
@@ -7,76 +6,77 @@ import {
   deleteDoc,
   updateDoc,
   collection,
-} from "firebase/firestore";
+} from 'firebase/firestore';
+import { db } from '../../firebase';
 
 // Commissions Async Thunks
 export const fetchCommissions = createAsyncThunk(
-  "commission/fetchCommissions",
+  'commission/fetchCommissions',
   async (truckId, { rejectWithValue }) => {
     try {
-      const commissionsRef = collection(db, "trucks", truckId, "commissions");
+      const commissionsRef = collection(db, 'trucks', truckId, 'commissions');
       const querySnapshot = await getDocs(commissionsRef);
       const results = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      console.log("Commissions fetched:", results); // Log fetched data
+      console.log('Commissions fetched:', results); // Log fetched data
       return results;
     } catch (error) {
-      console.error("Error fetching commissions:", error); // Log any errors
+      console.error('Error fetching commissions:', error); // Log any errors
       return rejectWithValue(error.toString());
     }
-  }
+  },
 );
 
 export const addCommission = createAsyncThunk(
-  "commission/addCommission",
+  'commission/addCommission',
   async ({ truckId, commissionData }, { dispatch, rejectWithValue }) => {
     try {
       const docRef = await addDoc(
-        collection(db, "trucks", truckId, "commissions"),
-        commissionData
+        collection(db, 'trucks', truckId, 'commissions'),
+        commissionData,
       );
       dispatch(fetchCommissions(truckId)); // Optionally refresh commissions list
       return { ...commissionData, id: docRef.id }; // Return the new commission with id
     } catch (error) {
       return rejectWithValue(error.toString());
     }
-  }
+  },
 );
 
 export const deleteCommission = createAsyncThunk(
-  "commission/deleteCommission",
+  'commission/deleteCommission',
   async ({ truckId, commissionId }, { dispatch, rejectWithValue }) => {
     try {
-      await deleteDoc(doc(db, "trucks", truckId, "commissions", commissionId));
+      await deleteDoc(doc(db, 'trucks', truckId, 'commissions', commissionId));
       dispatch(fetchCommissions(truckId)); // Optionally refresh commissions list
     } catch (error) {
       return rejectWithValue(error.toString());
     }
-  }
+  },
 );
 
 export const updateCommission = createAsyncThunk(
-  "commission/updateCommission",
+  'commission/updateCommission',
   async (
     { truckId, commissionId, commissionData },
-    { dispatch, rejectWithValue }
+    { dispatch, rejectWithValue },
   ) => {
     try {
       const commissionRef = doc(
         db,
-        "trucks",
+        'trucks',
         truckId,
-        "commissions",
-        commissionId
+        'commissions',
+        commissionId,
       );
       await updateDoc(commissionRef, commissionData);
       dispatch(fetchCommissions(truckId)); // Optionally refresh commissions list
     } catch (error) {
       return rejectWithValue(error.toString());
     }
-  }
+  },
 );
 
 const initialState = {
@@ -93,8 +93,8 @@ const initialState = {
 };
 
 const commissionSlice = createSlice({
-  name: "commission",
-  initialState: initialState, // Initial state defined above,
+  name: 'commission',
+  initialState, // Initial state defined above,
   reducers: {
     showCommissionModal(state) {
       state.showModal = true;
@@ -108,28 +108,27 @@ const commissionSlice = createSlice({
     calculateCommissions(state, action) {
       const { grossProfit } = action.payload;
 
-      console.log("Received Values:", {
+      console.log('Received Values:', {
         grossProfit,
       });
 
       // Calculate total flat buyer and seller commissions
       const totalFlatBuyerCommissions = state.commissions
-        .filter((com) => com.category === "Buyer" && com.type === "Flat")
+        .filter((com) => com.category === 'Buyer' && com.type === 'Flat')
         .reduce((sum, com) => sum + com.amount, 0);
 
       const totalFlatSellerCommissions = state.commissions
-        .filter((com) => com.category === "Seller" && com.type === "Flat")
+        .filter((com) => com.category === 'Seller' && com.type === 'Flat')
         .reduce((sum, com) => sum + com.amount, 0);
 
       // Adjusted gross profit after deducting flat commissions
-      const adjustedGrossProfit =
-        grossProfit - totalFlatBuyerCommissions - totalFlatSellerCommissions;
+      const adjustedGrossProfit = grossProfit - totalFlatBuyerCommissions - totalFlatSellerCommissions;
 
       // Calculate percentage commissions based on adjusted gross profit
       state.commissions.forEach((com) => {
-        if (com.type !== "Flat" && com.amount === null) {
+        if (com.type !== 'Flat' && com.amount === null) {
           // Check for null explicitly
-          const percentage = parseFloat(com.type.replace("%", "")) / 100;
+          const percentage = parseFloat(com.type.replace('%', '')) / 100;
           com.amount = adjustedGrossProfit * percentage;
           console.log(`Updated amount for ${com.type}: ${com.amount}`);
         }
@@ -137,11 +136,11 @@ const commissionSlice = createSlice({
 
       // Calculate total buyer and seller commissions
       const totalBuyerCommissions = state.commissions
-        .filter((com) => com.category === "Buyer")
+        .filter((com) => com.category === 'Buyer')
         .reduce((sum, com) => sum + com.amount, 0);
 
       const totalSellerCommissions = state.commissions
-        .filter((com) => com.category === "Seller")
+        .filter((com) => com.category === 'Seller')
         .reduce((sum, com) => sum + com.amount, 0);
 
       // Total commissions and net profit calculations
@@ -169,13 +168,13 @@ const commissionSlice = createSlice({
       })
       .addCase(deleteCommission.fulfilled, (state, action) => {
         state.commissions = state.commissions.filter(
-          (commission) => commission.id !== action.meta.arg.commissionId
+          (commission) => commission.id !== action.meta.arg.commissionId,
         );
         // Do not trigger calculateCommissions here
       })
       .addCase(updateCommission.fulfilled, (state, action) => {
         const index = state.commissions.findIndex(
-          (commission) => commission.id === action.meta.arg.commissionId
+          (commission) => commission.id === action.meta.arg.commissionId,
         );
         if (index !== -1) {
           state.commissions[index] = {

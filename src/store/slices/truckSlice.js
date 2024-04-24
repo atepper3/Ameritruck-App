@@ -1,5 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { db } from "../../firebase";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import {
   doc,
   getDoc,
@@ -10,44 +9,45 @@ import {
   where,
   getDocs,
   deleteDoc,
-} from "firebase/firestore";
+} from 'firebase/firestore';
+import { db } from '../../firebase';
 
 // Truck Async Thunks
 export const fetchTruckDetails = createAsyncThunk(
-  "truck/fetchTruckDetails",
+  'truck/fetchTruckDetails',
   async (truckId, { rejectWithValue }) => {
     try {
-      const docRef = doc(db, "trucks", truckId);
+      const docRef = doc(db, 'trucks', truckId);
       const docSnap = await getDoc(docRef);
-      if (!docSnap.exists()) throw new Error("No such document!");
+      if (!docSnap.exists()) throw new Error('No such document!');
       return { ...docSnap.data().truckinfo, id: truckId };
     } catch (error) {
       return rejectWithValue(error.toString());
     }
-  }
+  },
 );
 
 export const addTruck = createAsyncThunk(
-  "truck/addTruck",
+  'truck/addTruck',
   async (truckData, { rejectWithValue }) => {
     try {
-      const docRef = await addDoc(collection(db, "trucks"), {
+      const docRef = await addDoc(collection(db, 'trucks'), {
         truckinfo: truckData,
       });
       return { ...truckData, id: docRef.id };
     } catch (error) {
       return rejectWithValue(error.toString());
     }
-  }
+  },
 );
 
 export const addMultipleTrucks = createAsyncThunk(
-  "truck/addMultipleTrucks",
+  'truck/addMultipleTrucks',
   async (truckEntries, { rejectWithValue }) => {
     try {
       const addedTrucks = [];
       for (const truckData of truckEntries) {
-        const docRef = await addDoc(collection(db, "trucks"), {
+        const docRef = await addDoc(collection(db, 'trucks'), {
           truckinfo: truckData,
         });
         addedTrucks.push({ ...truckData, id: docRef.id });
@@ -56,28 +56,28 @@ export const addMultipleTrucks = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.toString());
     }
-  }
+  },
 );
 
 export const updateTruckDetails = createAsyncThunk(
-  "truck/updateTruckDetails",
+  'truck/updateTruckDetails',
   async ({ truckId, truckDetails }, { dispatch, rejectWithValue }) => {
     try {
-      await updateDoc(doc(db, "trucks", truckId), { truckinfo: truckDetails });
+      await updateDoc(doc(db, 'trucks', truckId), { truckinfo: truckDetails });
       dispatch(fetchTruckDetails(truckId)); // Optionally refetch truck details
     } catch (error) {
       return rejectWithValue(error.toString());
     }
-  }
+  },
 );
 
 export const fetchTruckList = createAsyncThunk(
-  "truck/fetchTruckList",
+  'truck/fetchTruckList',
   async (_, { rejectWithValue }) => {
     try {
       const truckInfoQuery = query(
-        collection(db, "trucks"),
-        where("truckinfo", "!=", null)
+        collection(db, 'trucks'),
+        where('truckinfo', '!=', null),
       );
       const querySnapshot = await getDocs(truckInfoQuery);
       const trucksArray = querySnapshot.docs.map((doc) => ({
@@ -88,7 +88,7 @@ export const fetchTruckList = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.toString());
     }
-  }
+  },
 );
 
 // Truck Slice
@@ -98,7 +98,7 @@ const truckInitialState = {
 };
 
 const truckSlice = createSlice({
-  name: "truck",
+  name: 'truck',
   initialState: truckInitialState,
   reducers: {},
   extraReducers: (builder) => {

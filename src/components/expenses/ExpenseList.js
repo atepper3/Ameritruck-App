@@ -7,6 +7,7 @@ import {
   deleteExpense,
   setCurrentExpense,
   showExpenseModal,
+  fetchTotalExpenses,
 } from "../../store/slices/expenseSlice";
 import { fetchTruckDetails } from "../../store/slices/truckSlice";
 import ExpenseForm from "./ExpenseForm"; // Ensure ExpenseForm is correctly imported
@@ -17,21 +18,20 @@ const ExpenseList = () => {
 
   const truckInfo = useSelector((state) => state.truck.truckInfo);
   const expenses = useSelector((state) => state.expense.items);
-  const totalsByCategory = useSelector(
-    (state) => state.expense.totalsByCategory
-  );
+
   const totalExpenses = useSelector((state) => state.expense.totalExpenses);
   const isExpenseModalOpen = useSelector(
-    (state) => state.expense.isExpenseModalOpen
+    (state) => state.expense.isExpenseModalOpen,
   );
   const loading = useSelector(
-    (state) => state.expense.loading || state.truck.loading
+    (state) => state.expense.loading || state.truck.loading,
   );
 
   useEffect(() => {
     if (truckId) {
       dispatch(fetchTruckDetails(truckId)); // Fetch truck details
       dispatch(fetchExpenses(truckId)); // This fetches expenses and initializes/updates total expenses
+      dispatch(fetchTotalExpenses(truckId)); // Fetch total expenses (this is a separate API call to get the total expenses for the truck
     }
   }, [dispatch, truckId]);
 
@@ -121,18 +121,6 @@ const ExpenseList = () => {
           <div className="table-responsive">
             <Table hover size="sm" className="mb-0 table-dark">
               <tbody>
-                {Object.entries(totalsByCategory).map(([category, total]) =>
-                  total > 0 ? (
-                    <tr key={category}>
-                      <td style={{ fontWeight: "bold", textAlign: "left" }}>
-                        Total {category}:
-                      </td>
-                      <td style={{ fontWeight: "bold", textAlign: "right" }}>
-                        ${total.toFixed(2)}
-                      </td>
-                    </tr>
-                  ) : null
-                )}
                 <tr>
                   <td style={{ fontWeight: "bold", textAlign: "left" }}>
                     Total Expenses:
