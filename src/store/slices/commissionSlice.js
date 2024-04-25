@@ -1,40 +1,58 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
   doc,
   getDocs,
+  getDoc,
   addDoc,
   deleteDoc,
   updateDoc,
   collection,
-} from 'firebase/firestore';
-import { db } from '../../firebase';
+} from "firebase/firestore";
+import { db } from "../../firebase";
 
 // Commissions Async Thunks
 export const fetchCommissions = createAsyncThunk(
-  'commission/fetchCommissions',
+  "commission/fetchCommissions",
   async (truckId, { rejectWithValue }) => {
     try {
-      const commissionsRef = collection(db, 'trucks', truckId, 'commissions');
+      const commissionsRef = collection(db, "trucks", truckId, "commissions");
       const querySnapshot = await getDocs(commissionsRef);
       const results = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      console.log('Commissions fetched:', results); // Log fetched data
+      console.log("Commissions fetched:", results); // Log fetched data
       return results;
     } catch (error) {
-      console.error('Error fetching commissions:', error); // Log any errors
+      console.error("Error fetching commissions:", error); // Log any errors
+      return rejectWithValue(error.toString());
+    }
+  },
+);
+
+export const fetchFinancials = createAsyncThunk(
+  "commission/fetchFinancials",
+  async (truckId, { rejectWithValue }) => {
+    try {
+      const docRef = doc(db, "trucks", truckId, "totals", "financials");
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data(); // Make sure this contains totalCommissions and netProfit
+      } else {
+        throw new Error("No financial data found");
+      }
+    } catch (error) {
       return rejectWithValue(error.toString());
     }
   },
 );
 
 export const addCommission = createAsyncThunk(
-  'commission/addCommission',
+  "commission/addCommission",
   async ({ truckId, commissionData }, { dispatch, rejectWithValue }) => {
     try {
       const docRef = await addDoc(
-        collection(db, 'trucks', truckId, 'commissions'),
+        collection(db, "trucks", truckId, "commissions"),
         commissionData,
       );
       dispatch(fetchCommissions(truckId)); // Optionally refresh commissions list
@@ -46,10 +64,10 @@ export const addCommission = createAsyncThunk(
 );
 
 export const deleteCommission = createAsyncThunk(
-  'commission/deleteCommission',
+  "commission/deleteCommission",
   async ({ truckId, commissionId }, { dispatch, rejectWithValue }) => {
     try {
-      await deleteDoc(doc(db, 'trucks', truckId, 'commissions', commissionId));
+      await deleteDoc(doc(db, "trucks", truckId, "commissions", commissionId));
       dispatch(fetchCommissions(truckId)); // Optionally refresh commissions list
     } catch (error) {
       return rejectWithValue(error.toString());
@@ -58,7 +76,7 @@ export const deleteCommission = createAsyncThunk(
 );
 
 export const updateCommission = createAsyncThunk(
-  'commission/updateCommission',
+  "commission/updateCommission",
   async (
     { truckId, commissionId, commissionData },
     { dispatch, rejectWithValue },
@@ -66,9 +84,9 @@ export const updateCommission = createAsyncThunk(
     try {
       const commissionRef = doc(
         db,
-        'trucks',
+        "trucks",
         truckId,
-        'commissions',
+        "commissions",
         commissionId,
       );
       await updateDoc(commissionRef, commissionData);
@@ -83,17 +101,14 @@ const initialState = {
   commissions: [], // List of all commissions
   currentCommission: null, // Store the current commission being edited or viewed
   showModal: false, // Control visibility of a modal or similar component
-  calculations: {
-    grossProfit: 0,
-    adjustedGrossProfit: 0,
-    totalBuyerCommissions: 0,
-    totalSellerCommissions: 0,
-    totalCommissions: 0,
-  },
+  financials: {
+    totalCommissions: 0, // Total commissions for the truck
+    netProfit: 0, // Net profit after commissions
+  }, // Store financial data like totalCommissions and netProfit
 };
 
 const commissionSlice = createSlice({
-  name: 'commission',
+  name: "commission",
   initialState, // Initial state defined above,
   reducers: {
     showCommissionModal(state) {
@@ -105,59 +120,14 @@ const commissionSlice = createSlice({
     setCurrentCommission(state, action) {
       state.currentCommission = action.payload;
     },
-    calculateCommissions(state, action) {
-      const { grossProfit } = action.payload;
-
-      console.log('Received Values:', {
-        grossProfit,
-      });
-
-      // Calculate total flat buyer and seller commissions
-      const totalFlatBuyerCommissions = state.commissions
-        .filter((com) => com.category === 'Buyer' && com.type === 'Flat')
-        .reduce((sum, com) => sum + com.amount, 0);
-
-      const totalFlatSellerCommissions = state.commissions
-        .filter((com) => com.category === 'Seller' && com.type === 'Flat')
-        .reduce((sum, com) => sum + com.amount, 0);
-
-      // Adjusted gross profit after deducting flat commissions
-      const adjustedGrossProfit = grossProfit - totalFlatBuyerCommissions - totalFlatSellerCommissions;
-
-      // Calculate percentage commissions based on adjusted gross profit
-      state.commissions.forEach((com) => {
-        if (com.type !== 'Flat' && com.amount === null) {
-          // Check for null explicitly
-          const percentage = parseFloat(com.type.replace('%', '')) / 100;
-          com.amount = adjustedGrossProfit * percentage;
-          console.log(`Updated amount for ${com.type}: ${com.amount}`);
-        }
-      });
-
-      // Calculate total buyer and seller commissions
-      const totalBuyerCommissions = state.commissions
-        .filter((com) => com.category === 'Buyer')
-        .reduce((sum, com) => sum + com.amount, 0);
-
-      const totalSellerCommissions = state.commissions
-        .filter((com) => com.category === 'Seller')
-        .reduce((sum, com) => sum + com.amount, 0);
-
-      // Total commissions and net profit calculations
-      const totalCommissions = totalBuyerCommissions + totalSellerCommissions;
-      const netProfit = grossProfit - totalCommissions;
-
-      // Storing calculated values
-      state.calculations.grossProfit = grossProfit;
-      state.calculations.totalBuyerCommissions = totalBuyerCommissions;
-      state.calculations.totalSellerCommissions = totalSellerCommissions;
-      state.calculations.totalCommissions = totalCommissions;
-      state.calculations.netProfit = netProfit;
-    },
   },
 
   extraReducers: (builder) => {
     builder
+      .addCase(fetchFinancials.fulfilled, (state, action) => {
+        state.financials.totalCommissions = action.payload.totalCommissions;
+        state.financials.netProfit = action.payload.netProfit;
+      })
       .addCase(fetchCommissions.fulfilled, (state, action) => {
         state.commissions = action.payload;
         // Do not trigger calculateCommissions here
@@ -191,7 +161,6 @@ export const {
   showCommissionModal,
   hideCommissionModal,
   setCurrentCommission,
-  calculateCommissions,
 } = commissionSlice.actions;
 
 export default commissionSlice.reducer;

@@ -9,35 +9,27 @@ import {
   hideCommissionModal,
   addCommission,
   updateCommission,
-  calculateCommissions,
+  fetchFinancials,
 } from "../../store/slices/commissionSlice";
 import { fetchTruckDetails } from "../../store/slices/truckSlice";
 import { Button, Table, Card } from "react-bootstrap";
 import CommissionForm from "./CommissionForm"; // Ensure this is the correct path
-import { fetchExpenses } from "../../store/slices/expenseSlice";
 
 const CommissionList = () => {
   const { id: truckId } = useParams();
   const dispatch = useDispatch();
   const commissions = useSelector((state) => state.commission.commissions);
-  const {
-    totalBuyerCommissions,
-    totalSellerCommissions,
-    totalCommissions,
-    netProfit = 0,
-  } = useSelector((state) => state.commission.calculations || {});
-
-  const totalExpenses = useSelector((state) => state.expense.totalExpenses);
+  const financials = useSelector((state) => state.commission.financials);
   const truckInfo = useSelector((state) => state.truck.truckInfo);
   const showModal = useSelector((state) => state.commission.showModal);
   const currentCommission = useSelector(
-    (state) => state.commission.currentCommission
+    (state) => state.commission.currentCommission,
   );
 
   useEffect(() => {
     dispatch(fetchCommissions(truckId));
     dispatch(fetchTruckDetails(truckId));
-    dispatch(fetchExpenses(truckId));
+    dispatch(fetchFinancials(truckId));
   }, [dispatch, truckId]);
 
   const handleAddCommission = () => {
@@ -62,7 +54,7 @@ const CommissionList = () => {
           truckId,
           commissionId: commissionData.id,
           commissionData,
-        })
+        }),
       );
     } else {
       // Add new commission
@@ -70,7 +62,7 @@ const CommissionList = () => {
         addCommission({
           truckId,
           commissionData,
-        })
+        }),
       );
     }
     dispatch(hideCommissionModal());
@@ -79,6 +71,14 @@ const CommissionList = () => {
   const handleClose = () => {
     dispatch(hideCommissionModal());
   };
+
+  // Calculate Buyer's and Seller's total commissions from the array
+  const totalBuyerCommissions = commissions
+    ?.filter((c) => c.category === "Buyer")
+    .reduce((sum, c) => sum + (c.amount || 0), 0);
+  const totalSellerCommissions = commissions
+    ?.filter((c) => c.category === "Seller")
+    .reduce((sum, c) => sum + (c.amount || 0), 0);
 
   return (
     <div>
@@ -203,11 +203,11 @@ const CommissionList = () => {
               </tr>
               <tr>
                 <td>Total Commissions</td>
-                <td>${totalCommissions.toFixed(2)}</td>
+                <td>${financials.totalCommissions.toFixed(2)}</td>
               </tr>
               <tr>
                 <td>Net Profit</td>
-                <td>${netProfit.toFixed(2)}</td>
+                <td>${financials.netProfit.toFixed(2)}</td>
               </tr>
             </tbody>
           </Table>
