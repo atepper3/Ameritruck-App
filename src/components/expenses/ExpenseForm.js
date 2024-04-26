@@ -5,6 +5,7 @@ import {
   addExpense,
   updateExpense,
   hideExpenseModal,
+  fetchTotalExpenses,
 } from "../../store/slices/expenseSlice";
 
 // Initial form state for resetting
@@ -17,10 +18,10 @@ const initialFormState = {
   paidOnDate: "",
 };
 
-const ExpenseForm = () => {
+const ExpenseForm = ({ truckId }) => {
   const dispatch = useDispatch();
   const { currentExpense, isExpenseModalOpen } = useSelector(
-    (state) => state.expense
+    (state) => state.expense,
   );
   const truckInfo = useSelector((state) => state.truck.truckInfo);
   const [formState, setFormState] = useState(initialFormState);
@@ -60,15 +61,19 @@ const ExpenseForm = () => {
             expenseId: currentExpense.id,
             expenseData: formattedData,
             previousCost: currentExpense.cost, // Ensure this value is correctly passed
-          })
-        ).unwrap();
+          }),
+        )
+          .unwrap()
+          .then(() => dispatch(fetchTotalExpenses(truckId))); // Optionally refresh total expenses
       } else {
         await dispatch(
           addExpense({
             truckId: truckInfo.id,
             expenseData: formattedData,
-          })
-        ).unwrap();
+          }),
+        )
+          .unwrap()
+          .then(() => dispatch(fetchTotalExpenses(truckId))); // Optionally refresh total expenses
       }
       closeModal(); // Close modal after successful action completion
     } catch (error) {

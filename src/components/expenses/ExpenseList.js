@@ -50,7 +50,9 @@ const ExpenseList = () => {
   };
 
   const handleDeleteExpense = (expenseId, cost) => {
-    dispatch(deleteExpense({ truckId, expenseId, expenseCost: cost }));
+    dispatch(deleteExpense({ truckId, expenseId, expenseCost: cost })).then(
+      () => dispatch(fetchTotalExpenses(truckId)),
+    );
   };
 
   const handleAddExpense = () => {
@@ -61,7 +63,7 @@ const ExpenseList = () => {
   return (
     <>
       <Button onClick={handleAddExpense}>Add Expense</Button>
-      <ExpenseForm show={isExpenseModalOpen} />
+      <ExpenseForm show={isExpenseModalOpen} truckId={truckInfo.id} />
 
       <Card className="shadow mb-4">
         <Card.Header className="bg-transparent">

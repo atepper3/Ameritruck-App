@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   doc,
   collection,
@@ -9,15 +9,15 @@ import {
   getDoc,
   setDoc,
   onSnapshot,
-} from 'firebase/firestore';
-import { db } from '../../firebase';
+} from "firebase/firestore";
+import { db } from "../../firebase";
 
 // Async thunk to fetch expenses
 export const fetchExpenses = createAsyncThunk(
-  'truck/fetchExpenses',
+  "truck/fetchExpenses",
   async (truckId, { rejectWithValue }) => {
     try {
-      const expensesRef = collection(db, 'trucks', truckId, 'expenses');
+      const expensesRef = collection(db, "trucks", truckId, "expenses");
       const querySnapshot = await getDocs(expensesRef);
       const expenses = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -32,16 +32,16 @@ export const fetchExpenses = createAsyncThunk(
 
 // Adding an expense
 export const addExpense = createAsyncThunk(
-  'truck/addExpense',
+  "truck/addExpense",
   async ({ truckId, expenseData }, { rejectWithValue }) => {
     try {
       const costAsNumber = Number(expenseData.cost);
       if (isNaN(costAsNumber)) {
-        console.error('Invalid cost value', expenseData.cost);
-        return rejectWithValue('Invalid cost value');
+        console.error("Invalid cost value", expenseData.cost);
+        return rejectWithValue("Invalid cost value");
       }
       const docRef = await addDoc(
-        collection(db, 'trucks', truckId, 'expenses'),
+        collection(db, "trucks", truckId, "expenses"),
         { ...expenseData, cost: costAsNumber },
       );
       return { id: docRef.id, ...expenseData, cost: costAsNumber };
@@ -53,10 +53,10 @@ export const addExpense = createAsyncThunk(
 
 // Deleting an expense
 export const deleteExpense = createAsyncThunk(
-  'truck/deleteExpense',
+  "truck/deleteExpense",
   async ({ truckId, expenseId }, { rejectWithValue }) => {
     try {
-      await deleteDoc(doc(db, 'trucks', truckId, 'expenses', expenseId));
+      await deleteDoc(doc(db, "trucks", truckId, "expenses", expenseId));
       return { truckId, expenseId };
     } catch (error) {
       return rejectWithValue(error.toString());
@@ -66,15 +66,15 @@ export const deleteExpense = createAsyncThunk(
 
 // Updating an expense
 export const updateExpense = createAsyncThunk(
-  'truck/updateExpense',
+  "truck/updateExpense",
   async ({ truckId, expenseId, expenseData }, { rejectWithValue }) => {
     try {
       const newExpenseAmount = Number(expenseData.cost);
       if (isNaN(newExpenseAmount)) {
-        console.error('Error: Invalid cost value');
-        return rejectWithValue('Invalid cost value');
+        console.error("Error: Invalid cost value");
+        return rejectWithValue("Invalid cost value");
       }
-      await updateDoc(doc(db, 'trucks', truckId, 'expenses', expenseId), {
+      await updateDoc(doc(db, "trucks", truckId, "expenses", expenseId), {
         ...expenseData,
         cost: newExpenseAmount,
       });
@@ -86,32 +86,27 @@ export const updateExpense = createAsyncThunk(
 );
 
 export const fetchTotalExpenses = createAsyncThunk(
-  'expenses/fetchTotalExpenses',
-  async (truckId, { dispatch, rejectWithValue }) => {
-    const totalsRef = doc(db, 'trucks', truckId, 'totals', 'financials');
+  "expenses/fetchTotalExpenses",
+  async (truckId, { rejectWithValue }) => {
     try {
-      const unsubscribe = onSnapshot(totalsRef, (docSnapshot) => {
-        if (docSnapshot.exists()) {
-          const data = docSnapshot.data();
-          dispatch(setTotalExpenses(data.totalExpenses));
-        } else {
-          console.error('No total expenses data found');
-          rejectWithValue('No total expenses data found');
-        }
-      });
-      // Returning the unsubscribe function in case you want to stop listening later
-      return () => unsubscribe();
+      const docRef = doc(db, "trucks", truckId, "totals", "financials");
+      const docSnapshot = await getDoc(docRef);
+      if (docSnapshot.exists()) {
+        const data = docSnapshot.data();
+        return data.totalExpenses; // Assuming 'totalExpenses' is the field stored in the document
+      } else {
+        console.error("No total expenses data found");
+        return rejectWithValue("No total expenses data found");
+      }
     } catch (error) {
-      console.error('Failed to set up snapshot listener:', error);
-      return rejectWithValue(
-        error.message || 'Could not set up snapshot listener',
-      );
+      console.error("Failed to fetch total expenses:", error);
+      return rejectWithValue(error.toString());
     }
   },
 );
 
 const expenseSlice = createSlice({
-  name: 'expense',
+  name: "expense",
   initialState: {
     items: [],
     loading: false,
@@ -132,7 +127,7 @@ const expenseSlice = createSlice({
     },
     setTotalExpenses(state, action) {
       state.totalExpenses = action.payload;
-      console.log('Total expenses updated', action.payload);
+      console.log("Total expenses updated", action.payload);
     },
   },
   extraReducers: (builder) => {
@@ -140,6 +135,9 @@ const expenseSlice = createSlice({
       .addCase(fetchExpenses.fulfilled, (state, action) => {
         state.items = action.payload;
         state.loading = false;
+      })
+      .addCase(fetchTotalExpenses.fulfilled, (state, action) => {
+        state.totalExpenses = action.payload;
       })
       .addCase(addExpense.fulfilled, (state, action) => {
         state.items.push(action.payload);
